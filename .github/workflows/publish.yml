@@ -1,0 +1,67 @@
+name: Publish - Micro Core Http
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  DART_VERSION: "3.2.3"
+
+jobs:
+  production:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "Starting Deploy on Production Environment"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
+
+      - name: "Installing Dart"
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+
+      - name: "Removing Previous Coverage Files"
+        run: rm -rf coverage/
+
+      - name: "Removing Previous Pubspec.lock"
+        run: rm -rf pubspec.lock
+
+      - name: "Downloading Libs (dart pub get)"
+        run: dart pub get
+
+      - name: "Verify Dart Code Formatting"
+        run: dart format --output=none .
+
+      - name: "Analyze Project Source Code"
+        run: dart analyze
+
+      - name: "Run tests"
+        run: dart run coverage:test_with_coverage
+
+      - name: "Upload coverage reports to Codecov"
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: "Validating Code Coverage"
+        run: |
+          git config user.name "JotaPe Tecnologia Workflow"
+          git config user.email contato@jotapetecnologia.com.br
+          git tag "v"$(cut -c10- <<< "$(grep 'version:' pubspec.yaml)")""
+          git push origin "v"$(cut -c10- <<< "$(grep 'version:' pubspec.yaml)")""
+          git fetch --tags origin
+          gh release create "v"$(cut -c10- <<< "$(grep 'version:' pubspec.yaml)")"" --verify-tag
+
+      - name: "Publishing Package"
+        uses: k-paxian/dart-package-publisher@v1.6
+        with:
+          accessToken: ${{ secrets.OAUTH_ACCESS_TOKEN }}
+          refreshToken: ${{ secrets.OAUTH_REFRESH_TOKEN }}
+          format: true
+          skipTests: true
