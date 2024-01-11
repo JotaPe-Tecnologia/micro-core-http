@@ -14,12 +14,15 @@
 
 import 'http_known_exception.dart';
 
-/// Class that indicate a specific scenario of an exception.
+/// Class that represents a specific scenario of an exception.
 ///
 /// - Status Code:     404
 /// - Status Message:  Not Found
 final class HttpExceptionNotFound extends HttpKnownException {
+  /// Status Code of an HTTP response.
   static const defaultStatusCode = 404;
+
+  /// Status Message of and HTTP response exception.
   static const defaultReason = 'Not Found';
 
   const HttpExceptionNotFound({

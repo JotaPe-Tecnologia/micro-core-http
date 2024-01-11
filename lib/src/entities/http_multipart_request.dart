@@ -18,15 +18,15 @@ import 'package:http/http.dart' as http;
 
 import 'http_base_request.dart';
 
-/// Class that represents basic requests.
-final class HttpRequest extends http.Request implements HttpBaseRequest {
+/// Class that represents requests with some kind of binary value in it.
+final class HttpMultipartRequest extends http.MultipartRequest implements HttpBaseRequest {
   /// Optional description of the module/service that the request is supposed to hit.
   final String? segment;
 
   /// Optional description of what the request is supposed to do.
   final String? step;
 
-  HttpRequest(
+  HttpMultipartRequest(
     super.method,
     super.url, {
     this.segment,
@@ -34,12 +34,12 @@ final class HttpRequest extends http.Request implements HttpBaseRequest {
   });
 
   /// Factory that creates a [HttpRequest] from a [http.BaseRequest].
-  factory HttpRequest.fromBaseRequest(
+  factory HttpMultipartRequest.fromBaseRequest(
     http.BaseRequest request, {
     String? segment,
     String? step,
   }) {
-    return HttpRequest(
+    return HttpMultipartRequest(
       request.method.toUpperCase(),
       request.url,
       segment: segment,
@@ -51,16 +51,17 @@ final class HttpRequest extends http.Request implements HttpBaseRequest {
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     return '''
-[ HttpRequest ] > A HttpRequest was sent!
-[ HttpRequest ] - Method           | ${method.toUpperCase()}
-[ HttpRequest ] - Base URL         | ${url.origin}
-[ HttpRequest ] - Endpoint         | ${url.path}
-[ HttpRequest ] - Query Params     | ${encoder.convert(url.queryParameters)}
-[ HttpRequest ] - Headers          | ${encoder.convert(headers)}
-[ HttpRequest ] - Body             | ${encoder.convert(body)}
-[ HttpRequest ] - Segment          | $segment
-[ HttpRequest ] - Step             | $step
-[ HttpRequest ] ----------------------------------------
+[ HttpMultipartRequest ] > A HttpMultipartRequest was sent!
+[ HttpMultipartRequest ] - Method           | ${method.toUpperCase()}
+[ HttpMultipartRequest ] - Base URL         | ${url.origin}
+[ HttpMultipartRequest ] - Endpoint         | ${url.path}
+[ HttpMultipartRequest ] - Query Params     | ${encoder.convert(url.queryParameters)}
+[ HttpMultipartRequest ] - Headers          | ${encoder.convert(headers)}
+[ HttpMultipartRequest ] - Body             | ${encoder.convert(fields)}
+[ HttpMultipartRequest ] - Files            | $files
+[ HttpMultipartRequest ] - Segment          | $segment
+[ HttpMultipartRequest ] - Step             | $step
+[ HttpMultipartRequest ] ----------------------------------------
 ''';
   }
 }

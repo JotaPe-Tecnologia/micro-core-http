@@ -16,8 +16,8 @@ import 'dart:developer';
 
 import 'package:micro_core_http/micro_core_http.dart';
 
-final class AppHttpAuthorization implements IHttpAuthorization {
-  const AppHttpAuthorization(
+final class AppHttpAuthorizationHandler implements IHttpAuthorizationHandler {
+  const AppHttpAuthorizationHandler(
       // Local Storage Instance
       );
 
@@ -43,13 +43,12 @@ void onException(HttpException exception, StackTrace stackTrace) {
 }
 
 final options = HttpOptions(
-  authorization: AppHttpAuthorization(),
+  authorizationHandler: AppHttpAuthorizationHandler(),
   baseUrl: "https://api-dev.app.zarppi.com.br",
   delayBetweenRetries: Duration(seconds: 2),
   requestTimeout: Duration(seconds: 8),
   extraRetries: 2,
   showLogs: true,
-  onException: onException,
 );
 
 final class Repository {

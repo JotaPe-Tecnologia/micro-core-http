@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../enums/http_authorization_type.dart';
-import '../interfaces/http_authorization_interface.dart';
+import '../entities/entities.dart' show HttpOptions;
 
-final class DefaultHttpAuthorization implements IHttpAuthorization {
-  const DefaultHttpAuthorization();
+/// Class to implement the methods that handle errors.
+abstract base class IHttpErrorHandler {
+  const IHttpErrorHandler();
 
-  @override
-  HttpAuthorizationType get authorizationType => HttpAuthorizationType.noAuthorization;
+  /// Method that prints the [Error] on terminal if the [HttpOptions.showLogs] is true.
+  void logError(Error error, StackTrace stackTrace);
 
-  @override
-  Future<Map<String, String>> getAuthorization() async => <String, String>{};
+  /// Method that runs when an error occurs.
+  ///
+  /// The default behavior is to print on the terminal all the error's data.
+  void onError(Error error, StackTrace stackTrace);
 }

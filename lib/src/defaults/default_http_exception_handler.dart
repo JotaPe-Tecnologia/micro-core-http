@@ -12,39 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:micro_core_http/src/interfaces/http_exception_handler_interface.dart';
+
 import '../entities/http_exception.dart';
 import '../entities/http_request.dart';
 import '../exceptions/exceptions.dart';
 
-abstract interface class DefaultHttpException {
-  static const exceptions = [
-    HttpExceptionBadRequest(),
-    HttpExceptionForbidden(),
-    HttpExceptionInternalServerError(),
-    HttpExceptionMethodNotAllowed(),
-    HttpExceptionNotFound(),
-    HttpExceptionRequestTimeout(),
-    HttpExceptionUnauthorized(),
-    HttpExceptionUnsupportedMediaType(),
-  ];
+/// Class that implements the methods that handle exceptions.
+final class DefaultHttpExceptionHandler extends IHttpExceptionHandler {
+  const DefaultHttpExceptionHandler();
 
-  static void onException(HttpException exception, StackTrace stackTrace) {
+  @override
+  void logException(HttpException exception, StackTrace stackTrace) {
     print('''${exception.toString()}[ ${exception.runtimeType} ] - StackTrace     | $stackTrace
 [ ${exception.runtimeType} ] -----------------------------------------
 ''');
   }
 
-  static void reconizeException(
+  @override
+  void onException(HttpException exception, StackTrace stackTrace) {}
+
+  @override
+  void reconizeException(
     int statusCode,
     String? statusMessage,
     StackTrace? stackTrace, {
     HttpRequest? request,
   }) {
-    final exceptionIndex = exceptions.indexWhere(
+    final exceptionIndex = IHttpExceptionHandler.knownExceptions.indexWhere(
       (exception) => exception.statusCode == statusCode,
     );
     if (exceptionIndex != -1) {
-      throw exceptions[exceptionIndex];
+      throw IHttpExceptionHandler.knownExceptions[exceptionIndex];
     }
 
     if (statusCode == 504) {

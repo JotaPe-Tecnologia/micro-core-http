@@ -14,12 +14,15 @@
 
 import 'http_known_exception.dart';
 
-/// Class that indicate a specific scenario of an exception.
+/// Class that represents a specific scenario of an exception.
 ///
 /// - Status Code:     401
 /// - Status Message:  Unauthorized
 final class HttpExceptionUnauthorized extends HttpKnownException {
+  /// Status Code of an HTTP response.
   static const defaultStatusCode = 401;
+
+  /// Status Message of and HTTP response exception.
   static const defaultReason = 'Unauthorized';
 
   const HttpExceptionUnauthorized({

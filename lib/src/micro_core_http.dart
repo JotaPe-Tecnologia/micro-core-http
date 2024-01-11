@@ -13,9 +13,14 @@
 // limitations under the License.
 
 export 'clients/http_client.dart';
-export 'entities/http_exception.dart';
-export 'entities/http_options.dart';
+export 'entities/entities.dart';
 export 'enums/enums.dart';
 export 'exceptions/exceptions.dart';
-export 'interfaces/http_authorization_interface.dart';
-export 'interfaces/http_client_interface.dart';
+export 'interfaces/interfaces.dart';
+
+
+
+/// 0 - Deal with Exceptions
+/// 1 - Refresh Token
+/// 2 - Pinning
+/// 3 - Other types of Body

@@ -16,15 +16,33 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+/// Class that represents the response of a HTTP's request.
 final class HttpResponse {
+  /// The data on the body of this response.
   final dynamic data;
+
+  /// The HTTP headers returned by the server.
   final Map<String, String> headers;
+
+  /// If the response was triggered by a redirect.
   final bool isRedirect;
+
+  /// Whether the server requested that a persistent connection be maintained.
   final bool persistentConnection;
+
+  /// The HTTP request that triggered this response.
   final http.BaseRequest? request;
+
+  /// Optional description of the module/service that the request is supposed to hit.
   final String? segment;
+
+  /// The HTTP status code for this response.
   final int statusCode;
+
+  /// The HTTP status code for this response.
   final String? statusMessage;
+
+  /// Optional description of what the request is supposed to do.
   final String? step;
 
   HttpResponse({
@@ -39,6 +57,7 @@ final class HttpResponse {
     this.step,
   });
 
+  /// Factory that creates a [HttpResponse] from a [http.Response].
   factory HttpResponse.fromResponse(
     http.Response response, {
     String? segment,

@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import '../interfaces/interfaces.dart' show IHttpAuthorizationHandler;
+
 /// Enum to define where the authorization will be inserted on the request.
 ///
 /// There are different types for this getter, such as:
 ///
 /// - [HttpAuthorizationType.headers]
 /// - [HttpAuthorizationType.noAuthorization] > Set this and the return of the
-/// [getAuthorization] method will not be inserted on any part of the request.
+/// [IHttpAuthorizationHandler.getAuthorization] method will not be inserted on any part of the request.
 /// - [HttpAuthorizationType.queryParams] > Set this and the return of the
-/// [getAuthorization] method will be inserted on the query params of the request.
+/// [IHttpAuthorizationHandler.getAuthorization] method will be inserted on the query params of the request.
 enum HttpAuthorizationType {
   /// Set this if the request needs authorization on the header of the request.
   headers,

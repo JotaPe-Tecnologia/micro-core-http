@@ -14,12 +14,15 @@
 
 import 'http_known_exception.dart';
 
-/// Class that indicate a specific scenario of an exception.
+/// Class that represents a specific scenario of an exception.
 ///
 /// - Status Code:     403
 /// - Status Message:  Forbidden
 final class HttpExceptionForbidden extends HttpKnownException {
+  /// Status Code of an HTTP response.
   static const defaultStatusCode = 403;
+
+  /// Status Message of and HTTP response exception.
   static const defaultReason = 'Forbidden';
 
   const HttpExceptionForbidden({

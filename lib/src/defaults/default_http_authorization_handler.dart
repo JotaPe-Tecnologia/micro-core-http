@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-abstract interface class DefaultHttpError {
-  static onError(Error exception, StackTrace stackTrace) {
-    print('''
-[ ${exception.runtimeType} ] > A ${exception.runtimeType} was thrown!
-[ ${exception.runtimeType} ] - Type           | ${exception.runtimeType}
-[ ${exception.runtimeType} ] - Error          | ${exception.toString()}
-[ ${exception.runtimeType} ] - StackTrace     | $stackTrace
-[ ${exception.runtimeType} ] -----------------------------------------
-''');
-  }
+import '../enums/http_authorization_type.dart';
+import '../interfaces/http_authorization_handler_interface.dart';
+
+/// Class that implements the authorization's default values needed in the project.
+final class DefaultHttpAuthorizationHandler implements IHttpAuthorizationHandler {
+  const DefaultHttpAuthorizationHandler();
+
+  @override
+  HttpAuthorizationType get authorizationType => HttpAuthorizationType.noAuthorization;
+
+  @override
+  Future<Map<String, String>> getAuthorization() async => <String, String>{};
 }

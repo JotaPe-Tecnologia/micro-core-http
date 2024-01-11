@@ -14,7 +14,9 @@
 
 import '../entities/http_response.dart';
 
+/// Class that represents the HTTP methods.
 abstract interface class IHttpClient {
+  /// Method that represents the HTTP's DELETE method.
   Future<HttpResponse> delete(
     String endpoint, {
     bool authenticate = false,
@@ -26,6 +28,7 @@ abstract interface class IHttpClient {
     String? step,
   });
 
+  /// Method that represents the HTTP's GET method.
   Future<HttpResponse> get(
     String endpoint, {
     bool authenticate = false,
@@ -36,6 +39,7 @@ abstract interface class IHttpClient {
     String? step,
   });
 
+  /// Method that represents the HTTP's HEAD method.
   Future<HttpResponse> head(
     String endpoint, {
     bool authenticate = false,
@@ -46,6 +50,7 @@ abstract interface class IHttpClient {
     String? step,
   });
 
+  /// Method that represents the HTTP's PUT method.
   Future<HttpResponse> put(
     String endpoint, {
     bool authenticate = false,
@@ -57,6 +62,7 @@ abstract interface class IHttpClient {
     String? step,
   });
 
+  /// Method that represents the HTTP's POST method.
   Future<HttpResponse> post(
     String endpoint, {
     bool authenticate = false,
@@ -68,6 +74,7 @@ abstract interface class IHttpClient {
     String? step,
   });
 
+  /// Method that represents the HTTP's PATCH method.
   Future<HttpResponse> patch(
     String endpoint, {
     bool authenticate = false,

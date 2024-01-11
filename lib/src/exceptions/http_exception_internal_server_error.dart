@@ -14,12 +14,15 @@
 
 import 'http_known_exception.dart';
 
-/// Class that indicate a specific scenario of an exception.
+/// Class that represents a specific scenario of an exception.
 ///
 /// - Status Code:     500
 /// - Status Message:  Internal Server Error
 final class HttpExceptionInternalServerError extends HttpKnownException {
+  /// Status Code of an HTTP response.
   static const defaultStatusCode = 500;
+
+  /// Status Message of and HTTP response exception.
   static const defaultReason = 'Internal Server Error';
 
   const HttpExceptionInternalServerError({

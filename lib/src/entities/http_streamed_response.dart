@@ -16,24 +16,16 @@ import 'package:http/http.dart' as http;
 
 import 'http_request.dart';
 
+/// Class that extends [http.StreamedResponse] to wrap the library.
 final class HttpStreamedResponse extends http.StreamedResponse {
   HttpStreamedResponse(
-    Stream<List<int>> stream,
-    int statusCode, {
-    int? contentLength,
+    super.stream,
+    super.statusCode, {
+    super.contentLength,
     HttpRequest? request,
-    Map<String, String> headers = const {},
-    bool isRedirect = false,
-    bool persistentConnection = true,
-    String? reasonPhrase,
-  }) : super(
-          stream,
-          statusCode,
-          contentLength: contentLength,
-          request: request,
-          headers: headers,
-          isRedirect: isRedirect,
-          persistentConnection: persistentConnection,
-          reasonPhrase: reasonPhrase,
-        );
+    super.headers = const {},
+    super.isRedirect = false,
+    super.persistentConnection = true,
+    super.reasonPhrase,
+  }) : super(request: request);
 }

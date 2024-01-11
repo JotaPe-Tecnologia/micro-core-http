@@ -32,15 +32,13 @@ abstract base class Constants {
   /// It will log all the requests, responses, exceptions and errors.
   static const showLogs = false;
 
-  // TODO
+  /// The basic value of a request headers when the body is a json.
   static const applicationJsonHeaders = {
     'accept': '*/*',
     'content-type': 'application/json',
   };
-  static const formUrlencodedHeaders = {
-    'accept': '*/*',
-    'content-type': 'application/x-www-form-urlencoded',
-  };
+
+  /// The basic value of a request headers when the body has some kind of binary data.
   static const formDataHeaders = {
     'accept': '*/*',
     'content-type': 'multipart/form-data',

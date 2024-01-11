@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'http_exception_bad_request.dart';
-export 'http_exception_forbidden.dart';
-export 'http_exception_method_not_allowed.dart';
-export 'http_exception_not_found.dart';
-export 'http_exception_internal_server_error.dart';
-export 'http_exception_request_timeout.dart';
-export 'http_exception_unauthorized.dart';
-export 'http_exception_unsupported_media_type.dart';
-export 'http_known_exception.dart';
+export 'default_http_authorization_handler.dart';
+export 'default_http_error_handler.dart';
+export 'default_http_exception_handler.dart';
+export 'default_http_request_handler.dart';
+export 'default_http_response_handler.dart';

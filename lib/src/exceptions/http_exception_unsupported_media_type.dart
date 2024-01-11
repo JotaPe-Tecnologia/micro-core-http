@@ -14,12 +14,15 @@
 
 import 'http_known_exception.dart';
 
-/// Class that indicate a specific scenario of an exception.
+/// Class that represents a specific scenario of an exception.
 ///
 /// - Status Code:     415
 /// - Status Message:  Unsupported Media Type
 final class HttpExceptionUnsupportedMediaType extends HttpKnownException {
+  /// Status Code of an HTTP response.
   static const defaultStatusCode = 415;
+
+  /// Status Message of and HTTP response exception.
   static const defaultReason = 'Unsupported Media Type';
 
   const HttpExceptionUnsupportedMediaType({

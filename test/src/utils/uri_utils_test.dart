@@ -28,7 +28,7 @@ void main() {
   };
 
   group(
-    'UriUtils - generateUri',
+    'UriUtils - create',
     () {
       test(
         '| Should return a Uri with https scheme',
@@ -41,7 +41,7 @@ void main() {
           const expectedScheme = 'https';
 
           // Act
-          final uri = UriUtils.generateUri(
+          final uri = UriUtils.create(
             httpsBaseUrl,
             endpoint: endpoint,
             queryParameters: queryParameters,
@@ -67,7 +67,7 @@ void main() {
           const expectedScheme = 'http';
 
           // Act
-          final uri = UriUtils.generateUri(
+          final uri = UriUtils.create(
             httpBaseUrl,
             endpoint: endpoint,
             queryParameters: queryParameters,
@@ -92,7 +92,7 @@ void main() {
           const expectedScheme = 'mailto';
 
           // Act
-          final uri = UriUtils.generateUri(
+          final uri = UriUtils.create(
             mailtoBaseUrl,
           );
 
@@ -114,7 +114,7 @@ void main() {
           const expectedKey3 = '0';
 
           // Act
-          final uri = UriUtils.generateUri(
+          final uri = UriUtils.create(
             httpsBaseUrl,
             queryParameters: queryParameters,
           );

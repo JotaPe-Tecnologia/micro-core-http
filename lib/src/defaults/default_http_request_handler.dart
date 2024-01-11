@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'http_exception_bad_request.dart';
-export 'http_exception_forbidden.dart';
-export 'http_exception_method_not_allowed.dart';
-export 'http_exception_not_found.dart';
-export 'http_exception_internal_server_error.dart';
-export 'http_exception_request_timeout.dart';
-export 'http_exception_unauthorized.dart';
-export 'http_exception_unsupported_media_type.dart';
-export 'http_known_exception.dart';
+import '../entities/entities.dart' show HttpBaseRequest;
+import '../interfaces/http_request_handler_interface.dart';
+
+/// Class that implements the methods that handle requests.
+final class DefaultHttpRequestHandler extends IHttpRequestHandler {
+  const DefaultHttpRequestHandler();
+
+  @override
+  void logRequest(HttpBaseRequest request) => print(request);
+
+  @override
+  void onRequest(HttpBaseRequest request) {}
+}

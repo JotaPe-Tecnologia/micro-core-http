@@ -16,37 +16,25 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../entities/http_request.dart';
-import '../entities/http_response.dart';
+import '../entities/entities.dart' show HttpBaseRequest, HttpFormData, HttpMultipartRequest, HttpRequest;
+import '../interfaces/interfaces.dart' show IHttpRequestHandler;
 import '../utils/constants.dart';
 
-/// Extension of [http.BaseClient] that allows for intercepting and modifying http requests and responses.
-///
-/// Example:
-/// ```dart
-/// import 'package:http/http.dart' as http;
-///
-/// var client = HttpInterceptClient(
-///   http.Client(),
-///   onRequest: (request) {
-///     print("${request.method}/${request.url}");
-///   },
-///   onResponse: (response) {
-///     print("${request.method}/${request.url}");
-///   }
-/// );
-/// ```
+/// Extension of [http.BaseClient] that allows for intercepting and modifying http requests.
 final class HttpInterceptClient extends http.BaseClient {
+  /// The client that will send the request.
   final http.Client _inner;
+
+  /// A handler to execute its methods at the moment the request is sent.
+  final IHttpRequestHandler requestHandler;
+
+  /// The flag that will define if the [IHttpRequestHandler] should print the request on terminal.
   final bool showLogs;
-  final void Function(HttpRequest)? onRequest;
-  final void Function(HttpResponse)? onResponse;
 
   HttpInterceptClient(
-    this._inner, {
+    this._inner,
+    this.requestHandler, {
     this.showLogs = false,
-    this.onRequest,
-    this.onResponse,
   });
 
   @override
@@ -55,7 +43,8 @@ final class HttpInterceptClient extends http.BaseClient {
     super.close();
   }
 
-  HttpRequest _createRequest(
+  /// Method that creates the request.
+  HttpBaseRequest _createRequest(
     String method,
     Uri url, {
     Object? body,
@@ -64,44 +53,70 @@ final class HttpInterceptClient extends http.BaseClient {
     String? segment,
     String? step,
   }) {
-    final request = HttpRequest(
-      method,
-      url,
-      segment: segment,
-      step: step,
-    );
+    late final HttpBaseRequest request;
 
-    if (headers != null) request.headers.addAll(headers);
-    if (encoding != null) request.encoding = encoding;
-    if (body != null) {
-      // TODO: a
-      // if (body is String) {
-      //   request.body = body;
-      //   request.headers.addAll(Constants.applicationJsonHeaders);
-      // } else if (body is List) {
-      //   request.bodyBytes = body.cast<int>();
-      //   request.headers.addAll(Constants.applicationJsonHeaders);
-      // } else if (body is Map) {
-      //   request.bodyFields = body.cast<String, String>();
-      //   request.headers.addAll(Constants.applicationJsonHeaders);
-      // } else {
-      //   throw ArgumentError(
-      //     '[ ArgumentError ] > Invalid Request Body "${body.toString()}".',
-      //   );
-      // }
-      request.body = jsonEncode(body);
-      request.headers.addAll(Constants.applicationJsonHeaders);
+    // It will send a [HttpMultipartRequest] if the body is [HttpFormData]
+    if (body is HttpFormData) {
+      final multipartRequest = HttpMultipartRequest(
+        method,
+        url,
+        segment: segment,
+        step: step,
+      );
+
+      // Adding base headers
+      multipartRequest.headers.addAll(Constants.formDataHeaders);
+
+      // Adding fields
+      multipartRequest.fields.addAll((body).fields);
+
+      // Adding files
+      multipartRequest.files.addAll((body).files);
+
+      request = multipartRequest;
+    } else {
+      // It will send a [HttpRequest]
+      final httpRequest = HttpRequest(
+        method,
+        url,
+        segment: segment,
+        step: step,
+      );
+
+      if (encoding != null) httpRequest.encoding = encoding;
+
+      // Adding base headers
+      httpRequest.headers.addAll(Constants.applicationJsonHeaders);
+
+      // Adding custom body
+      if (body != null) {
+        if (body is String || body is List || body is Map) {
+          httpRequest.body = jsonEncode(body);
+        } else {
+          throw ArgumentError(
+            '[ ArgumentError ] > Invalid Request Body "${body.toString()}".',
+          );
+        }
+      }
+
+      request = httpRequest;
     }
+
+    // Adding custom headers
+    if (headers != null) request.headers.addAll(headers);
 
     return request;
   }
 
-  Future<http.Response> _sendUnstreamed(HttpRequest request) async {
+  /// Method that sends the request.
+  Future<http.Response> _sendUnstreamed(HttpBaseRequest request) async {
+    // Logging request
     if (showLogs) {
-      print(request);
+      requestHandler.logRequest(request);
     }
 
-    onRequest?.call(request);
+    // Custom onRequest method from the [IHttpRequestHandler]
+    requestHandler.onRequest(request);
 
     final response = await http.Response.fromStream(
       await send(request),

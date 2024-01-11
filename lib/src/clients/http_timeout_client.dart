@@ -17,21 +17,15 @@ import 'package:http/http.dart' as http;
 import '../entities/http_request.dart';
 import '../exceptions/http_exception_request_timeout.dart';
 
-/// Extension of [http.BaseClient] that throws an [HttpTimeoutException] if enough time passes without getting a response.
-///
-/// Example:
-/// ```dart
-/// import 'package:http/http.dart' as http;
-///
-/// var client = HttpTimeoutClient(
-///   http.Client(),
-///   timeout: const Duration(seconds: 30),
-///   customTimeoutMessage: 'After 30 seconds there was no response from the host!',
-/// );
-/// ```
+/// Extension of [http.BaseClient] that throws an [HttpExceptionRequestTimeout] if enough time passes without getting a response.
 final class HttpTimeoutClient extends http.BaseClient {
+  /// The client that will send the request.
   final http.Client _inner;
+
+  /// The timeout duration that will determine when to throw the [HttpExceptionRequestTimeout]. 
   final Duration timeout;
+
+  /// An override of the default message of a [HttpExceptionRequestTimeout].
   final String? customTimeoutMessage;
 
   HttpTimeoutClient(
@@ -40,7 +34,8 @@ final class HttpTimeoutClient extends http.BaseClient {
     this.customTimeoutMessage,
   });
 
-  String get timeoutDefaultMessage {
+  /// Getter of the timeout message.
+  String get _timeoutDefaultMessage {
     return (customTimeoutMessage?.isNotEmpty ?? false) ? customTimeoutMessage! : 'After ${timeout.inSeconds} seconds there was no response from the host!';
   }
 
@@ -57,7 +52,7 @@ final class HttpTimeoutClient extends http.BaseClient {
       onTimeout: () {
         throw HttpExceptionRequestTimeout(
           request: HttpRequest.fromBaseRequest(request),
-          statusMessage: timeoutDefaultMessage,
+          statusMessage: _timeoutDefaultMessage,
         );
       },
     );

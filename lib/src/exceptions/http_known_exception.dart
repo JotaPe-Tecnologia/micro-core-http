@@ -17,7 +17,9 @@ import 'dart:convert';
 import '../entities/http_exception.dart';
 import '../entities/http_request.dart';
 
+/// Class that represents a scenario of an known exception.
 base class HttpKnownException extends HttpException implements Exception {
+  /// The HTTP request that were the cause of the exception.
   final HttpRequest? request;
 
   const HttpKnownException({

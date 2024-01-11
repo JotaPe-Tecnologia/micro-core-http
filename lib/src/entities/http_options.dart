@@ -12,54 +12,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '../defaults/default_http_authorization.dart';
-import '../defaults/default_http_error.dart';
-import '../defaults/default_http_exception.dart';
-import '../interfaces/http_authorization_interface.dart';
+import '../defaults/defaults.dart';
+import '../interfaces/interfaces.dart' hide IHttpClient;
 import '../utils/constants.dart';
-import 'http_exception.dart';
-import 'http_request.dart';
-import 'http_response.dart';
 
+/// All the configuration needed to define the behavior of the HTTP clients.
 final class HttpOptions {
-  ///
-  final IHttpAuthorization authorization;
+  /// The handler of the request's authorization.
+  final IHttpAuthorizationHandler authorizationHandler;
 
-  ///
+  /// The defualt base url.
   final String baseUrl;
 
-  ///
+  /// The duration that the client will wait to retry the request after a timeout.
   final Duration delayBetweenRetries;
 
-  ///
-  final void Function(HttpException exception, StackTrace stackTrace)? onException;
+  /// The handler of the request's error.
+  final IHttpErrorHandler errorHandler;
 
-  ///
-  final void Function(Error error, StackTrace stackTrace)? onError;
+  /// The handler of the request's exception.
+  final IHttpExceptionHandler exceptionHandler;
 
-  ///
-  final HttpRequest Function(HttpRequest)? onRequest;
+  /// The handler of the request's response.
+  final IHttpResponseHandler responseHandler;
 
-  ///
-  final HttpResponse Function(HttpResponse)? onResponse;
+  /// The handler of the request.
+  final IHttpRequestHandler requestHandler;
 
-  ///
+  /// The duration that the client will wait for a response after sending the request.
   final Duration requestTimeout;
 
+  /// The number of retries that the client will send the request after the first time.
+  ///
   /// `n` retries means that the request will be sent at most `n + 1` times.
   final int extraRetries;
 
+  /// The flag that activates all the out of the box logs.
   ///
+  /// It will log all the requests, responses, exceptions and errors.
   final bool showLogs;
 
   const HttpOptions({
-    this.authorization = const DefaultHttpAuthorization(),
+    this.authorizationHandler = const DefaultHttpAuthorizationHandler(),
     required this.baseUrl,
     this.delayBetweenRetries = Constants.delayBetweenRetries,
-    this.onException = DefaultHttpException.onException,
-    this.onError = DefaultHttpError.onError,
-    this.onRequest,
-    this.onResponse,
+    this.errorHandler = const DefaultHttpErrorHandler(),
+    this.exceptionHandler = const DefaultHttpExceptionHandler(),
+    this.requestHandler = const DefaultHttpRequestHandler(),
+    this.responseHandler = const DefaultHttpResponseHandler(),
     this.requestTimeout = Constants.requestTimeout,
     this.extraRetries = Constants.extraRetries,
     this.showLogs = Constants.showLogs,
