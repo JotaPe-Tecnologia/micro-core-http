@@ -14,8 +14,8 @@
 
 import 'package:http/http.dart' as http;
 
-import '../entities/http_request.dart';
-import '../exceptions/http_exception_request_timeout.dart';
+import '../entities/entities.dart' show HttpRequest;
+import '../exceptions/exceptions.dart' show HttpExceptionRequestTimeout;
 
 /// Extension of [http.BaseClient] that throws an [HttpExceptionRequestTimeout] if enough time passes without getting a response.
 final class HttpTimeoutClient extends http.BaseClient {

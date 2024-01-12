@@ -33,6 +33,11 @@ final class HttpOptions {
   /// The handler of the request's exception.
   final IHttpExceptionHandler exceptionHandler;
 
+  /// The handler of the refresh token flow.
+  ///
+  /// To work properly the [refreshTokenAndRetryRequest] should be `true`.
+  final IHttpRefreshHandler refreshHandler;
+
   /// The handler of the request's response.
   final IHttpResponseHandler responseHandler;
 
@@ -52,12 +57,19 @@ final class HttpOptions {
   /// It will log all the requests, responses, exceptions and errors.
   final bool showLogs;
 
+  /// The flag that activates the flow of refreshing an expired token and retrying.
+  ///
+  /// The flow will work properly when you activate this flag and implement the [IHttpRefreshHandler].
+  final bool refreshTokenAndRetryRequest;
+
   const HttpOptions({
     this.authorizationHandler = const DefaultHttpAuthorizationHandler(),
     required this.baseUrl,
     this.delayBetweenRetries = Constants.delayBetweenRetries,
     this.errorHandler = const DefaultHttpErrorHandler(),
     this.exceptionHandler = const DefaultHttpExceptionHandler(),
+    this.refreshHandler = const DefaultHttpRefreshHandler(),
+    this.refreshTokenAndRetryRequest = Constants.refreshTokenAndRetryRequest,
     this.requestHandler = const DefaultHttpRequestHandler(),
     this.responseHandler = const DefaultHttpResponseHandler(),
     this.requestTimeout = Constants.requestTimeout,

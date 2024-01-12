@@ -18,9 +18,6 @@ export 'enums/enums.dart';
 export 'exceptions/exceptions.dart';
 export 'interfaces/interfaces.dart';
 
-
-
-/// 0 - Deal with Exceptions
-/// 1 - Refresh Token
+/// 0 - Metadata
+/// 1 - Tests
 /// 2 - Pinning
-/// 3 - Other types of Body

@@ -18,18 +18,19 @@
 ## Features
 
 * Basic HTTP Requests (DELETE, GET, PATCH, POST, PUT)
-* Request's Authorization and Logging became easy to implement
+* Request's Authorization and Logging can be easily implemented and in an organized way
 * Retry Requests setting number of retries and delay between retries
+* Refresh the authorization tokens implementing the interceptor for that.
 
 ## Usage
 
-### Tópic 1
+### Basic Usage
 
 ```dart
 print('dart code');
 ```
 
-### Tópic 2
+### Complete Usage
 
 ```dart
 print('dart code');

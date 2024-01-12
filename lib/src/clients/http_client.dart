@@ -65,6 +65,7 @@ final class HttpClient implements IHttpClient {
     Future<HttpResponse> Function(HttpInterceptClient client) request,
   ) async {
     HttpInterceptClient? client;
+    HttpResponse? response;
 
     try {
       client = _createClient(
@@ -76,7 +77,8 @@ final class HttpClient implements IHttpClient {
         options.requestTimeout,
       );
 
-      return await request(client);
+      response = await request(client);
+      return response;
     } on HttpException catch (exception, stackTrace) {
       // Logging exception
       if (options.showLogs) {
@@ -85,6 +87,14 @@ final class HttpClient implements IHttpClient {
 
       // Custom onException method from the [IHttpExceptionHandler]
       options.exceptionHandler.onException(exception, stackTrace);
+
+      // Custom refreshTokenAndRetryRequest method from the [IHttpRefreshHandler]
+      if (options.refreshTokenAndRetryRequest && exception.statusCode == options.refreshHandler.statusCode) {
+        final response = await options.refreshHandler.refreshTokenAndRetryRequest(
+          () => request(client!),
+        );
+        return response;
+      }
 
       rethrow;
     } on Error catch (error, stackTrace) {
@@ -113,37 +123,38 @@ final class HttpClient implements IHttpClient {
     String? segment,
     String? step,
   }) async {
-    final completeQueryParams = <String, dynamic>{};
-    final completeHeaders = <String, String>{};
-
-    // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        completeHeaders.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        completeQueryParams.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-    }
-
-    if (headers != null) {
-      completeHeaders.addAll(headers);
-    }
-
-    // Creating URI
-    final uri = UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
-      endpoint: endpoint,
-      queryParameters: completeQueryParams,
-    );
-
     return _sendRequest(
       (client) async {
+        final completeQueryParams = <String, dynamic>{};
+        final completeHeaders = <String, String>{};
+
+        // Authenticating the request based on the [IHttpAuthorizationHandler]
+        if (authenticate) {
+          if (options.authorizationHandler.authorizationType.isHeaders) {
+            completeHeaders.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+
+          if (options.authorizationHandler.authorizationType.isQueryParams) {
+            completeQueryParams.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+        }
+
+        if (headers != null) {
+          completeHeaders.addAll(headers);
+        }
+
+        // Creating URI
+        final uri = UriUtils.create(
+          replaceBaseUrl ?? options.baseUrl,
+          endpoint: endpoint,
+          queryParameters: completeQueryParams,
+        );
+
+        // Sending the request
         final httpResponse = await client.delete(
           uri,
           body: body,
@@ -200,37 +211,38 @@ final class HttpClient implements IHttpClient {
     String? segment,
     String? step,
   }) async {
-    final completeQueryParams = <String, dynamic>{};
-    final completeHeaders = <String, String>{};
-
-    // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        completeHeaders.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        completeQueryParams.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-    }
-
-    if (headers != null) {
-      completeHeaders.addAll(headers);
-    }
-
-    // Creating URI
-    final uri = UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
-      endpoint: endpoint,
-      queryParameters: completeQueryParams,
-    );
-
     return _sendRequest(
       (client) async {
+        final completeQueryParams = <String, dynamic>{};
+        final completeHeaders = <String, String>{};
+
+        // Authenticating the request based on the [IHttpAuthorizationHandler]
+        if (authenticate) {
+          if (options.authorizationHandler.authorizationType.isHeaders) {
+            completeHeaders.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+
+          if (options.authorizationHandler.authorizationType.isQueryParams) {
+            completeQueryParams.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+        }
+
+        if (headers != null) {
+          completeHeaders.addAll(headers);
+        }
+
+        // Creating URI
+        final uri = UriUtils.create(
+          replaceBaseUrl ?? options.baseUrl,
+          endpoint: endpoint,
+          queryParameters: completeQueryParams,
+        );
+
+        // Sending the request
         final httpResponse = await client.get(
           uri,
           headers: completeHeaders,
@@ -286,37 +298,38 @@ final class HttpClient implements IHttpClient {
     String? segment,
     String? step,
   }) async {
-    final completeQueryParams = <String, dynamic>{};
-    final completeHeaders = <String, String>{};
-
-    // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        completeHeaders.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        completeQueryParams.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-    }
-
-    if (headers != null) {
-      completeHeaders.addAll(headers);
-    }
-
-    // Creating URI
-    final uri = UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
-      endpoint: endpoint,
-      queryParameters: completeQueryParams,
-    );
-
     return _sendRequest(
       (client) async {
+        final completeQueryParams = <String, dynamic>{};
+        final completeHeaders = <String, String>{};
+
+        // Authenticating the request based on the [IHttpAuthorizationHandler]
+        if (authenticate) {
+          if (options.authorizationHandler.authorizationType.isHeaders) {
+            completeHeaders.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+
+          if (options.authorizationHandler.authorizationType.isQueryParams) {
+            completeQueryParams.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+        }
+
+        if (headers != null) {
+          completeHeaders.addAll(headers);
+        }
+
+        // Creating URI
+        final uri = UriUtils.create(
+          replaceBaseUrl ?? options.baseUrl,
+          endpoint: endpoint,
+          queryParameters: completeQueryParams,
+        );
+
+        // Sending the request
         final httpResponse = await client.head(
           uri,
           headers: completeHeaders,
@@ -373,37 +386,38 @@ final class HttpClient implements IHttpClient {
     String? segment,
     String? step,
   }) async {
-    final completeQueryParams = <String, dynamic>{};
-    final completeHeaders = <String, String>{};
-
-    // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        completeHeaders.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        completeQueryParams.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-    }
-
-    if (headers != null) {
-      completeHeaders.addAll(headers);
-    }
-
-    // Creating URI
-    final uri = UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
-      endpoint: endpoint,
-      queryParameters: completeQueryParams,
-    );
-
     return _sendRequest(
       (client) async {
+        final completeQueryParams = <String, dynamic>{};
+        final completeHeaders = <String, String>{};
+
+        // Authenticating the request based on the [IHttpAuthorizationHandler]
+        if (authenticate) {
+          if (options.authorizationHandler.authorizationType.isHeaders) {
+            completeHeaders.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+
+          if (options.authorizationHandler.authorizationType.isQueryParams) {
+            completeQueryParams.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+        }
+
+        if (headers != null) {
+          completeHeaders.addAll(headers);
+        }
+
+        // Creating URI
+        final uri = UriUtils.create(
+          replaceBaseUrl ?? options.baseUrl,
+          endpoint: endpoint,
+          queryParameters: completeQueryParams,
+        );
+
+        // Sending the request
         final httpResponse = await client.patch(
           uri,
           body: body,
@@ -461,37 +475,38 @@ final class HttpClient implements IHttpClient {
     String? segment,
     String? step,
   }) async {
-    final completeQueryParams = <String, dynamic>{};
-    final completeHeaders = <String, String>{};
-
-    // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        completeHeaders.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        completeQueryParams.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-    }
-
-    if (headers != null) {
-      completeHeaders.addAll(headers);
-    }
-
-    // Creating URI
-    final uri = UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
-      endpoint: endpoint,
-      queryParameters: completeQueryParams,
-    );
-
     return _sendRequest(
       (client) async {
+        final completeQueryParams = <String, dynamic>{};
+        final completeHeaders = <String, String>{};
+
+        // Authenticating the request based on the [IHttpAuthorizationHandler]
+        if (authenticate) {
+          if (options.authorizationHandler.authorizationType.isHeaders) {
+            completeHeaders.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+
+          if (options.authorizationHandler.authorizationType.isQueryParams) {
+            completeQueryParams.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+        }
+
+        if (headers != null) {
+          completeHeaders.addAll(headers);
+        }
+
+        // Creating URI
+        final uri = UriUtils.create(
+          replaceBaseUrl ?? options.baseUrl,
+          endpoint: endpoint,
+          queryParameters: completeQueryParams,
+        );
+
+        // Sending the request
         final httpResponse = await client.post(
           uri,
           body: body,
@@ -549,37 +564,38 @@ final class HttpClient implements IHttpClient {
     String? segment,
     String? step,
   }) async {
-    final completeQueryParams = <String, dynamic>{};
-    final completeHeaders = <String, String>{};
-
-    // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        completeHeaders.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        completeQueryParams.addAll(
-          await options.authorizationHandler.getAuthorization(),
-        );
-      }
-    }
-
-    if (headers != null) {
-      completeHeaders.addAll(headers);
-    }
-
-    // Creating URI
-    final uri = UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
-      endpoint: endpoint,
-      queryParameters: completeQueryParams,
-    );
-
     return _sendRequest(
       (client) async {
+        final completeQueryParams = <String, dynamic>{};
+        final completeHeaders = <String, String>{};
+
+        // Authenticating the request based on the [IHttpAuthorizationHandler]
+        if (authenticate) {
+          if (options.authorizationHandler.authorizationType.isHeaders) {
+            completeHeaders.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+
+          if (options.authorizationHandler.authorizationType.isQueryParams) {
+            completeQueryParams.addAll(
+              await options.authorizationHandler.getAuthorization(),
+            );
+          }
+        }
+
+        if (headers != null) {
+          completeHeaders.addAll(headers);
+        }
+
+        // Creating URI
+        final uri = UriUtils.create(
+          replaceBaseUrl ?? options.baseUrl,
+          endpoint: endpoint,
+          queryParameters: completeQueryParams,
+        );
+
+        // Sending the request
         final httpResponse = await client.put(
           uri,
           body: body,

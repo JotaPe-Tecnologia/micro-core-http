@@ -32,6 +32,9 @@ abstract base class Constants {
   /// It will log all the requests, responses, exceptions and errors.
   static const showLogs = false;
 
+  /// The flag that activates the flow of refreshing an expired token and retrying.
+  static const refreshTokenAndRetryRequest = false;
+
   /// The basic value of a request headers when the body is a json.
   static const applicationJsonHeaders = {
     'accept': '*/*',

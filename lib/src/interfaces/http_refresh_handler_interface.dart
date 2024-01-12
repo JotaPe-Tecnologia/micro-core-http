@@ -12,9 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'default_http_authorization_handler.dart';
-export 'default_http_error_handler.dart';
-export 'default_http_exception_handler.dart';
-export 'default_http_refresh_handler.dart';
-export 'default_http_request_handler.dart';
-export 'default_http_response_handler.dart';
+import '../entities/entities.dart' show HttpResponse;
+
+/// Class to implement the methods that handle the flow of refreshing authorization tokens.
+abstract interface class IHttpRefreshHandler {
+  const IHttpRefreshHandler();
+
+  /// The specific status code when the [refreshTokenAndRetryRequest] will be executed.
+  int get statusCode;
+
+  /// The method that will handle the refresh of the authorization tokens and retry the request that
+  /// triggered the action.
+  Future<HttpResponse> refreshTokenAndRetryRequest(
+    Future<HttpResponse> Function() request,
+  );
+}

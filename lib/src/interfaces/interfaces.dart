@@ -16,5 +16,6 @@ export 'http_authorization_handler_interface.dart';
 export 'http_client_interface.dart';
 export 'http_error_handler_interface.dart';
 export 'http_exception_handler_interface.dart';
+export 'http_refresh_handler_interface.dart';
 export 'http_request_handler_interface.dart';
 export 'http_response_handler_interface.dart';
