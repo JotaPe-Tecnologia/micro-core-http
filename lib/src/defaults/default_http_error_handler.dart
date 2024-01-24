@@ -15,7 +15,7 @@
 import '../interfaces/http_error_handler_interface.dart';
 
 /// Class that implements the methods that handle errors.
-final class DefaultHttpErrorHandler extends IHttpErrorHandler {
+final class DefaultHttpErrorHandler implements IHttpErrorHandler {
   const DefaultHttpErrorHandler();
 
   @override

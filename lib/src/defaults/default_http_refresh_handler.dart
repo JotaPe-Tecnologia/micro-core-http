@@ -20,7 +20,7 @@ final class DefaultHttpRefreshHandler implements IHttpRefreshHandler {
   const DefaultHttpRefreshHandler();
 
   @override
-  int get statusCode => 401;
+  int statusCode() => 401;
 
   @override
   Future<HttpResponse> refreshTokenAndRetryRequest(

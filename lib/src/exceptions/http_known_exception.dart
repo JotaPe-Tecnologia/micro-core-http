@@ -14,23 +14,45 @@
 
 import 'dart:convert';
 
-import '../entities/http_exception.dart';
-import '../entities/http_request.dart';
+import '../entities/entities.dart' show HttpException, HttpRequest;
 
 /// Class that represents a scenario of an known exception.
 base class HttpKnownException extends HttpException implements Exception {
+  /// The HTTP code of the exception.
+  final int code;
+
+  /// The HTTP description of the exception.
+  final String? description;
+
+  /// The HTTP reason of the exception.
+  final String reason;
+
   /// The HTTP request that were the cause of the exception.
   final HttpRequest? request;
 
   const HttpKnownException({
+    required this.code,
+    this.description,
+    required this.reason,
     this.request,
-    required int code,
-    required String reason,
-    String? statusMessage,
   }) : super(
           statusCode: code,
-          statusMessage: '[ $code - $reason ] ${statusMessage ?? ""}',
+          statusMessage: '[ $code - $reason ]${description ?? ""}',
         );
+
+  HttpKnownException copyWith({
+    int? code,
+    String? description,
+    String? reason,
+    HttpRequest? request,
+  }) {
+    return HttpKnownException(
+      code: code ?? this.code,
+      description: description ?? this.description,
+      reason: reason ?? this.reason,
+      request: request ?? this.request,
+    );
+  }
 
   @override
   String toString() {

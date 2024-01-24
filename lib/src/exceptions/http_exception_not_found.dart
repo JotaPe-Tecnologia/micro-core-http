@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import '../entities/entities.dart' show HttpRequest;
 import 'http_known_exception.dart';
 
 /// Class that represents a specific scenario of an exception.
@@ -29,6 +30,23 @@ final class HttpExceptionNotFound extends HttpKnownException {
     super.request,
     super.code = defaultStatusCode,
     super.reason = defaultReason,
-    super.statusMessage,
-  });
+    String? description,
+  }) : super(
+          description: description != null ? " $description" : "",
+        );
+  
+  @override
+  HttpExceptionNotFound copyWith({
+    int? code,
+    String? description,
+    String? reason,
+    HttpRequest? request,
+  }) {
+    return HttpExceptionNotFound(
+      code: code ?? defaultStatusCode, 
+      description: description,
+      reason: reason ?? defaultReason,
+      request: request,
+    );
+  }
 }

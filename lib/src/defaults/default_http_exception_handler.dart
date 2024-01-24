@@ -19,7 +19,7 @@ import '../entities/http_request.dart';
 import '../exceptions/exceptions.dart';
 
 /// Class that implements the methods that handle exceptions.
-final class DefaultHttpExceptionHandler extends IHttpExceptionHandler {
+final class DefaultHttpExceptionHandler implements IHttpExceptionHandler {
   const DefaultHttpExceptionHandler();
 
   @override
@@ -33,35 +33,15 @@ final class DefaultHttpExceptionHandler extends IHttpExceptionHandler {
   void onException(HttpException exception, StackTrace stackTrace) {}
 
   @override
-  void reconizeException(
+  void reconizeCustomExceptions(
     int statusCode,
     String? statusMessage,
     StackTrace? stackTrace, {
     HttpRequest? request,
+    HttpKnownException? suggestedException,
   }) {
-    final exceptionIndex = IHttpExceptionHandler.knownExceptions.indexWhere(
-      (exception) => exception.statusCode == statusCode,
-    );
-    if (exceptionIndex != -1) {
-      throw IHttpExceptionHandler.knownExceptions[exceptionIndex];
-    }
-
-    if (statusCode == 504) {
-      throw HttpExceptionRequestTimeout(
-        code: statusCode,
-        reason: 'Gateway Timeout',
-        request: request,
-        statusMessage: statusMessage,
-      );
-    }
-
-    if (statusCode > 500) {
-      throw HttpExceptionInternalServerError(
-        code: statusCode,
-        reason: 'Internal Server Error',
-        request: request,
-        statusMessage: statusMessage,
-      );
+    if (suggestedException != null) {
+      throw suggestedException;
     }
   }
 }

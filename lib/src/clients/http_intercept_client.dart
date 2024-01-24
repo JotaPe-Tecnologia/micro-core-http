@@ -21,7 +21,7 @@ import '../interfaces/interfaces.dart' show IHttpRequestHandler;
 import '../utils/constants.dart';
 
 /// Extension of [http.BaseClient] that allows for intercepting and modifying http requests.
-final class HttpInterceptClient extends http.BaseClient {
+class HttpInterceptClient extends http.BaseClient {
   /// The client that will send the request.
   final http.Client _inner;
 
@@ -44,7 +44,7 @@ final class HttpInterceptClient extends http.BaseClient {
   }
 
   /// Method that creates the request.
-  HttpBaseRequest _createRequest(
+  HttpBaseRequest createRequest(
     String method,
     Uri url, {
     Object? body,
@@ -83,8 +83,6 @@ final class HttpInterceptClient extends http.BaseClient {
         step: step,
       );
 
-      if (encoding != null) httpRequest.encoding = encoding;
-
       // Adding base headers
       httpRequest.headers.addAll(Constants.applicationJsonHeaders);
 
@@ -108,8 +106,15 @@ final class HttpInterceptClient extends http.BaseClient {
     return request;
   }
 
+  @override
+  Future<http.StreamedResponse> send(
+    http.BaseRequest request,
+  ) async {
+    return _inner.send(request);
+  }
+
   /// Method that sends the request.
-  Future<http.Response> _sendUnstreamed(HttpBaseRequest request) async {
+  Future<http.Response> sendUnstreamed(HttpBaseRequest request) async {
     // Logging request
     if (showLogs) {
       requestHandler.logRequest(request);
@@ -134,7 +139,7 @@ final class HttpInterceptClient extends http.BaseClient {
     String? segment,
     String? step,
   }) {
-    final request = _createRequest(
+    final request = createRequest(
       'DELETE',
       url,
       body: body,
@@ -143,7 +148,7 @@ final class HttpInterceptClient extends http.BaseClient {
       segment: segment,
       step: step,
     );
-    return _sendUnstreamed(request);
+    return sendUnstreamed(request);
   }
 
   @override
@@ -153,14 +158,14 @@ final class HttpInterceptClient extends http.BaseClient {
     String? segment,
     String? step,
   }) {
-    final request = _createRequest(
+    final request = createRequest(
       'GET',
       url,
       headers: headers,
       segment: segment,
       step: step,
     );
-    return _sendUnstreamed(request);
+    return sendUnstreamed(request);
   }
 
   @override
@@ -170,56 +175,14 @@ final class HttpInterceptClient extends http.BaseClient {
     String? segment,
     String? step,
   }) {
-    final request = _createRequest(
+    final request = createRequest(
       'HEAD',
       url,
       headers: headers,
       segment: segment,
       step: step,
     );
-    return _sendUnstreamed(request);
-  }
-
-  @override
-  Future<http.Response> post(
-    Uri url, {
-    Object? body,
-    Encoding? encoding,
-    Map<String, String>? headers,
-    String? segment,
-    String? step,
-  }) {
-    final request = _createRequest(
-      'POST',
-      url,
-      body: body,
-      encoding: encoding,
-      headers: headers,
-      segment: segment,
-      step: step,
-    );
-    return _sendUnstreamed(request);
-  }
-
-  @override
-  Future<http.Response> put(
-    Uri url, {
-    Object? body,
-    Encoding? encoding,
-    Map<String, String>? headers,
-    String? segment,
-    String? step,
-  }) {
-    final request = _createRequest(
-      'PUT',
-      url,
-      body: body,
-      encoding: encoding,
-      headers: headers,
-      segment: segment,
-      step: step,
-    );
-    return _sendUnstreamed(request);
+    return sendUnstreamed(request);
   }
 
   @override
@@ -231,7 +194,7 @@ final class HttpInterceptClient extends http.BaseClient {
     String? segment,
     String? step,
   }) {
-    final request = _createRequest(
+    final request = createRequest(
       'PATCH',
       url,
       body: body,
@@ -240,13 +203,48 @@ final class HttpInterceptClient extends http.BaseClient {
       segment: segment,
       step: step,
     );
-    return _sendUnstreamed(request);
+    return sendUnstreamed(request);
   }
 
   @override
-  Future<http.StreamedResponse> send(
-    http.BaseRequest request,
-  ) async {
-    return _inner.send(request);
+  Future<http.Response> post(
+    Uri url, {
+    Object? body,
+    Encoding? encoding,
+    Map<String, String>? headers,
+    String? segment,
+    String? step,
+  }) {
+    final request = createRequest(
+      'POST',
+      url,
+      body: body,
+      encoding: encoding,
+      headers: headers,
+      segment: segment,
+      step: step,
+    );
+    return sendUnstreamed(request);
+  }
+
+  @override
+  Future<http.Response> put(
+    Uri url, {
+    Object? body,
+    Encoding? encoding,
+    Map<String, String>? headers,
+    String? segment,
+    String? step,
+  }) {
+    final request = createRequest(
+      'PUT',
+      url,
+      body: body,
+      encoding: encoding,
+      headers: headers,
+      segment: segment,
+      step: step,
+    );
+    return sendUnstreamed(request);
   }
 }

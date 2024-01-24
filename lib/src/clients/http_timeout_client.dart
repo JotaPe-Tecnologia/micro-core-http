@@ -35,7 +35,7 @@ final class HttpTimeoutClient extends http.BaseClient {
   });
 
   /// Getter of the timeout message.
-  String get _timeoutDefaultMessage {
+  String get timeoutDefaultMessage {
     return (customTimeoutMessage?.isNotEmpty ?? false) ? customTimeoutMessage! : 'After ${timeout.inSeconds} seconds there was no response from the host!';
   }
 
@@ -52,7 +52,7 @@ final class HttpTimeoutClient extends http.BaseClient {
       onTimeout: () {
         throw HttpExceptionRequestTimeout(
           request: HttpRequest.fromBaseRequest(request),
-          statusMessage: _timeoutDefaultMessage,
+          description: timeoutDefaultMessage,
         );
       },
     );

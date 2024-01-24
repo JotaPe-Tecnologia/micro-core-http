@@ -33,20 +33,6 @@ final class HttpMultipartRequest extends http.MultipartRequest implements HttpBa
     this.step,
   });
 
-  /// Factory that creates a [HttpRequest] from a [http.BaseRequest].
-  factory HttpMultipartRequest.fromBaseRequest(
-    http.BaseRequest request, {
-    String? segment,
-    String? step,
-  }) {
-    return HttpMultipartRequest(
-      request.method.toUpperCase(),
-      request.url,
-      segment: segment,
-      step: step,
-    );
-  }
-
   @override
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');

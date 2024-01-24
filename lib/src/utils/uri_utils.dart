@@ -49,7 +49,7 @@ abstract interface class UriUtils {
     }
 
     // Creating a Uri with http scheme
-    if (baseUrl.startsWith('https://')) {
+    if (baseUrl.startsWith('http://')) {
       return Uri.http(
         baseUrl.replaceFirst('http://', ''),
         endpoint,

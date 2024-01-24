@@ -57,7 +57,7 @@ final class HttpRequest extends http.Request implements HttpBaseRequest {
 [ HttpRequest ] - Endpoint         | ${url.path}
 [ HttpRequest ] - Query Params     | ${encoder.convert(url.queryParameters)}
 [ HttpRequest ] - Headers          | ${encoder.convert(headers)}
-[ HttpRequest ] - Body             | ${encoder.convert(body)}
+[ HttpRequest ] - Body             | ${body.isNotEmpty ? encoder.convert(jsonDecode(body)) : null}
 [ HttpRequest ] - Segment          | $segment
 [ HttpRequest ] - Step             | $step
 [ HttpRequest ] ----------------------------------------

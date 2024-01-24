@@ -1,84 +1,64 @@
-// // Copyright 2024 JotapeTecnologia
+// Copyright 2024 JotapeTecnologia
 
-// // Licensed under the Apache License, Version 2.0 (the "License");
-// // you may not use this file except in compliance with the License.
-// // You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 
-// //     http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 
-// // Unless required by applicable law or agreed to in writing, software
-// // distributed under the License is distributed on an "AS IS" BASIS,
-// // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// // See the License for the specific language governing permissions and
-// // limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-// import 'package:micro_core_http/src/entities/http_exception.dart';
-// import 'package:test/test.dart';
+import 'package:micro_core_http/src/entities/http_exception.dart';
+import 'package:test/test.dart';
 
-// void main() {
-//   group(
-//     'HttpException - Status Code',
-//     () {
-//       const statusMessage = 'statusMessage';
-//       const type = HttpExceptionType.noAuthorization;
+void main() {
+  group(
+    'HttpException |',
+    () {
+      group(
+        'statusCode |',
+        () {
+          test(
+            'Should return an instance if has a valid statusCode',
+            () {
+              // Arrange
+              const validStatusCode = 400;
 
-//       test(
-//         '| Should thow an AssertionError when statusCode is lower than 400',
-//         () {
-//           // Arrange
-//           final statusCode = 399;
+              // Act
+              final result = HttpException(
+                statusCode: validStatusCode,
+                statusMessage: 'statusMessage',
+              );
 
-//           try {
-//             // Act
-//             HttpException(
-//               statusCode: statusCode,
-//               statusMessage: statusMessage,
-//               type: type,
-//             );
-//           } catch (error) {
-//             // Assert
-//             expect(error, isA<AssertionError>());
-//           }
-//         },
-//       );
+              // Assert
+              expect(result, isA<HttpException>());
+            },
+          );
 
-//       test(
-//         '| Should thow an AssertionError when statusCode is greater than 599',
-//         () {
-//           // Arrange
-//           final statusCode = 600;
+          test(
+            'Should throw an AssertionError if has a invalid statusCode',
+            () {
+              // Arrange
+              const invalidStatusCode = 0;
 
-//           try {
-//             // Act
-//             HttpException(
-//               statusCode: statusCode,
-//               statusMessage: statusMessage,
-//               type: type,
-//             );
-//           } catch (error) {
-//             // Assert
-//             expect(error, isA<AssertionError>());
-//           }
-//         },
-//       );
-
-//       test(
-//         '| Should create an instance of HttpException when statusCode is between [400, 599]',
-//         () {
-//           // Arrange
-//           final statusCode = 404;
-
-//           // Act
-//           final exception = HttpException(
-//             statusCode: statusCode,
-//             statusMessage: statusMessage,
-//             type: type,
-//           );
-
-//           // Assert
-//           expect(exception.statusCode, equals(statusCode));
-//         },
-//       );
-//     },
-//   );
-// }
+              try {
+                // Act
+                final _ = HttpException(
+                  statusCode: invalidStatusCode,
+                  statusMessage: 'statusMessage',
+                );
+              } on AssertionError catch (error) {
+                // Assert
+                expect(error.message, equals('[ HttpException ] > Invalid Error Status Code'));
+              }
+            },
+          );
+        },
+      );
+    },
+  );
+}

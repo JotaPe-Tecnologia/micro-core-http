@@ -16,8 +16,45 @@ import '../entities/entities.dart' show HttpException, HttpOptions, HttpRequest;
 import '../exceptions/exceptions.dart';
 
 /// Class to implement the methods that handle exceptions.
-abstract base class IHttpExceptionHandler {
+abstract interface class IHttpExceptionHandler {
   const IHttpExceptionHandler();
+
+  static HttpKnownException? reconizeLibExceptions(
+    int statusCode, {
+    String? description,
+    StackTrace? stackTrace,
+    HttpRequest? request,
+  }) {
+    final exceptionIndex = IHttpExceptionHandler.knownExceptions.indexWhere(
+      (exception) => exception.statusCode == statusCode,
+    );
+    if (exceptionIndex != -1) {
+      return IHttpExceptionHandler.knownExceptions[exceptionIndex].copyWith(
+        description: description,
+        request: request,
+      );
+    }
+
+    if (statusCode == 504) {
+      return HttpExceptionRequestTimeout(
+        code: statusCode,
+        reason: 'Gateway Timeout',
+        request: request,
+        description: description,
+      );
+    }
+
+    if (statusCode > 500) {
+      return HttpExceptionInternalServerError(
+        code: statusCode,
+        reason: 'Internal Server Error',
+        request: request,
+        description: description,
+      );
+    }
+    
+    return null;
+  }
 
   /// List of library's known exceptions.
   static const List<HttpKnownException> knownExceptions = [
@@ -51,5 +88,11 @@ abstract base class IHttpExceptionHandler {
   /// - 408, 504 [HttpExceptionRequestTimeout]
   /// - 415 [HttpExceptionUnsupportedMediaType]
   /// - 500, ..., 599 [HttpExceptionInternalServerError]
-  void reconizeException(int statusCode, String? statusMessage, StackTrace? stackTrace, {HttpRequest? request});
+  void reconizeCustomExceptions(
+    int statusCode,
+    String? description,
+    StackTrace? stackTrace, {
+    HttpKnownException? suggestedException,
+    HttpRequest? request,
+  });
 }

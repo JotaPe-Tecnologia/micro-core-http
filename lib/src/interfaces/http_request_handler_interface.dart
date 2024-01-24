@@ -15,7 +15,7 @@
 import '../entities/entities.dart' show HttpBaseRequest, HttpOptions;
 
 /// Class to implement the methods that handle requests.
-abstract base class IHttpRequestHandler {
+abstract class IHttpRequestHandler {
   const IHttpRequestHandler();
 
   /// Method that prints the [HttpBaseRequest] on terminal if the [HttpOptions.showLogs] is true.

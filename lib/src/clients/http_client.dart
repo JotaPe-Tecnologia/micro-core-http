@@ -13,15 +13,10 @@
 // limitations under the License.
 
 import 'package:http/http.dart' as http;
-import 'package:http/retry.dart';
-import 'package:micro_core_http/src/interfaces/http_request_handler_interface.dart';
+import 'package:http/retry.dart' as retry;
 
-import '../entities/http_exception.dart';
-import '../entities/http_options.dart';
-import '../entities/http_request.dart';
-import '../entities/http_response.dart';
-import '../interfaces/http_client_interface.dart';
-import '../interfaces/http_response_handler_interface.dart';
+import '../entities/entities.dart' show HttpException, HttpOptions, HttpRequest, HttpResponse;
+import '../interfaces/interfaces.dart' show IHttpClient, IHttpExceptionHandler, IHttpRequestHandler, IHttpResponseHandler;
 import '../utils/uri_utils.dart';
 import 'http_intercept_client.dart';
 import 'http_timeout_client.dart';
@@ -31,24 +26,58 @@ final class HttpClient implements IHttpClient {
   /// All the configuration needed to define the behavior of the HTTP clients.
   final HttpOptions options;
 
-  const HttpClient({required this.options});
+  final http.Client? customClient;
+
+  const HttpClient({required this.options, this.customClient});
+
+  void handleError(Error error, StackTrace stackTrace) {
+    // Logging error
+    if (options.showLogs) {
+      options.errorHandler.logError(error, stackTrace);
+    }
+
+    // Custom onError method from the [IHttpErrorHandler]
+    options.errorHandler.onError(error, stackTrace);
+  }
+
+  Future<HttpResponse> handleException(
+    HttpException exception,
+    StackTrace stackTrace,
+    Future<HttpResponse> Function() request,
+  ) async {
+    // Logging exception
+    if (options.showLogs) {
+      options.exceptionHandler.logException(exception, stackTrace);
+    }
+
+    // Custom onException method from the [IHttpExceptionHandler]
+    options.exceptionHandler.onException(exception, stackTrace);
+
+    // Custom refreshTokenAndRetryRequest method from the [IHttpRefreshHandler]
+    if (options.refreshTokenAndRetryRequest && exception.statusCode == options.refreshHandler.statusCode()) {
+      final response = await options.refreshHandler.refreshTokenAndRetryRequest(request);
+      return response;
+    }
+
+    throw exception;
+  }
 
   /// Method that creates the HTTP client to send the request.
-  static HttpInterceptClient _createClient(
+  HttpInterceptClient createClient(
     Duration delayBetweenRetries,
     IHttpResponseHandler responseHandler,
     IHttpRequestHandler requestHandler,
     int extraRetries,
     bool showLogs,
-    Duration timeout,
+    Duration requestTimeout,
   ) {
-    final inner = http.Client();
+    final inner = customClient ?? http.Client();
 
     return HttpInterceptClient(
-      RetryClient(
+      retry.RetryClient(
         HttpTimeoutClient(
           inner,
-          timeout,
+          requestTimeout,
         ),
         retries: extraRetries,
         delay: (_) => delayBetweenRetries,
@@ -61,14 +90,13 @@ final class HttpClient implements IHttpClient {
   }
 
   /// Method that sends the request.
-  Future<HttpResponse> _sendRequest(
+  Future<HttpResponse> sendRequest(
     Future<HttpResponse> Function(HttpInterceptClient client) request,
   ) async {
     HttpInterceptClient? client;
-    HttpResponse? response;
 
     try {
-      client = _createClient(
+      client = createClient(
         options.delayBetweenRetries,
         options.responseHandler,
         options.requestHandler,
@@ -77,39 +105,131 @@ final class HttpClient implements IHttpClient {
         options.requestTimeout,
       );
 
-      response = await request(client);
+      final response = await request(client);
       return response;
     } on HttpException catch (exception, stackTrace) {
-      // Logging exception
-      if (options.showLogs) {
-        options.exceptionHandler.logException(exception, stackTrace);
-      }
-
-      // Custom onException method from the [IHttpExceptionHandler]
-      options.exceptionHandler.onException(exception, stackTrace);
-
-      // Custom refreshTokenAndRetryRequest method from the [IHttpRefreshHandler]
-      if (options.refreshTokenAndRetryRequest && exception.statusCode == options.refreshHandler.statusCode) {
-        final response = await options.refreshHandler.refreshTokenAndRetryRequest(
-          () => request(client!),
-        );
-        return response;
-      }
-
-      rethrow;
+      final response = await handleException(
+        exception,
+        stackTrace,
+        () => request(client!),
+      );
+      return response;
     } on Error catch (error, stackTrace) {
-      // Logging error
-      if (options.showLogs) {
-        options.errorHandler.logError(error, stackTrace);
-      }
-
-      // Custom onError method from the [IHttpErrorHandler]
-      options.errorHandler.onError(error, stackTrace);
-
+      handleError(error, stackTrace);
       rethrow;
     } finally {
       client?.close();
     }
+  }
+
+  Future<Map<String, String>> getCompleteHeaders(
+    bool authenticate,
+    Map<String, String>? headers,
+  ) async {
+    final completeHeaders = <String, String>{};
+
+    // Authenticating the request based on the [IHttpAuthorizationHandler]
+    if (authenticate) {
+      if (options.authorizationHandler.authorizationType.isHeaders) {
+        final authorizationHeaders = await options.authorizationHandler.getAuthorization();
+        completeHeaders.addAll(authorizationHeaders);
+      }
+    }
+
+    if (headers != null) {
+      completeHeaders.addAll(headers);
+    }
+
+    return completeHeaders;
+  }
+
+  Future<Map<String, String>> getCompleteQueryParameters(
+    bool authenticate,
+    Map<String, String>? queryParameters,
+  ) async {
+    final completeQueryParams = <String, String>{};
+
+    // Authenticating the request based on the [IHttpAuthorizationHandler]
+    if (authenticate) {
+      if (options.authorizationHandler.authorizationType.isQueryParams) {
+        final authorizationQueryParams = await options.authorizationHandler.getAuthorization();
+        completeQueryParams.addAll(authorizationQueryParams);
+      }
+    }
+
+    if (queryParameters != null) {
+      completeQueryParams.addAll(queryParameters);
+    }
+
+    return completeQueryParams;
+  }
+
+  Uri getUri(
+    String endpoint, {
+    String? replaceBaseUrl,
+    Map<String, String>? queryParameters,
+  }) {
+    return UriUtils.create(
+      replaceBaseUrl ?? options.baseUrl,
+      endpoint: endpoint,
+      queryParameters: queryParameters,
+    );
+  }
+
+  HttpResponse parseHttpResponse(
+    http.Response httpResponse, {
+    String? segment,
+    String? step,
+  }) {
+    // Parsing the [http.Response] into a [HttpResponse]
+    final response = HttpResponse.fromResponse(
+      httpResponse,
+      segment: segment,
+      step: step,
+    );
+
+    // Logging response
+    if (options.showLogs) {
+      options.responseHandler.logResponse(response);
+    }
+
+    // Custom onResponse method from the [IHttpResponseHandler]
+    options.responseHandler.onResponse(response);
+
+    return response;
+  }
+
+  void validateIfResponseShouldBeTreatedAsException(
+    http.Response httpResponse, {
+    String? segment,
+    String? step,
+  }) {
+    HttpRequest? request;
+
+    if (httpResponse.request != null) {
+      request = HttpRequest.fromBaseRequest(
+        httpResponse.request!,
+        segment: segment,
+        step: step,
+      );
+    }
+
+    // Getting the suggested HttpException
+    final suggestedException = IHttpExceptionHandler.reconizeLibExceptions(
+      httpResponse.statusCode,
+      description: httpResponse.reasonPhrase,
+      stackTrace: StackTrace.current,
+      request: request,
+    );
+
+    // Custom reconizeException method from the [IHttpExceptionHandler]
+    options.exceptionHandler.reconizeCustomExceptions(
+      httpResponse.statusCode,
+      httpResponse.reasonPhrase,
+      StackTrace.current,
+      request: request,
+      suggestedException: suggestedException,
+    );
   }
 
   @override
@@ -118,39 +238,29 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
-  }) async {
-    return _sendRequest(
+  }) {
+    return sendRequest(
       (client) async {
-        final completeQueryParams = <String, dynamic>{};
-        final completeHeaders = <String, String>{};
+        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+        final completeQueryParams = await getCompleteQueryParameters(
+          authenticate,
+          queryParameters,
+        );
 
-        // Authenticating the request based on the [IHttpAuthorizationHandler]
-        if (authenticate) {
-          if (options.authorizationHandler.authorizationType.isHeaders) {
-            completeHeaders.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
+        // Generating the complete headers base on the [IHttpAuthorizationHandler]
+        final completeHeaders = await getCompleteHeaders(
+          authenticate,
+          headers,
+        );
 
-          if (options.authorizationHandler.authorizationType.isQueryParams) {
-            completeQueryParams.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
-        }
-
-        if (headers != null) {
-          completeHeaders.addAll(headers);
-        }
-
-        // Creating URI
-        final uri = UriUtils.create(
-          replaceBaseUrl ?? options.baseUrl,
-          endpoint: endpoint,
+        // Generating URI
+        final uri = getUri(
+          endpoint,
+          replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
         );
 
@@ -163,38 +273,18 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        HttpRequest? request;
-
-        if (httpResponse.request != null) {
-          request = HttpRequest.fromBaseRequest(
-            httpResponse.request!,
-            segment: segment,
-            step: step,
-          );
-        }
-
-        // Custom reconizeException method from the [IHttpExceptionHandler]
-        options.exceptionHandler.reconizeException(
-          httpResponse.statusCode,
-          httpResponse.reasonPhrase,
-          StackTrace.current,
-          request: request,
-        );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = HttpResponse.fromResponse(
+        validateIfResponseShouldBeTreatedAsException(
           httpResponse,
           segment: segment,
           step: step,
         );
 
-        // Logging response
-        if (options.showLogs) {
-          options.responseHandler.logResponse(response);
-        }
-
-        // Custom onResponse method from the [IHttpResponseHandler]
-        options.responseHandler.onResponse(response);
+        // Parsing the [http.Response] into a [HttpResponse]
+        final response = parseHttpResponse(
+          httpResponse,
+          segment: segment,
+          step: step,
+        );
 
         return response;
       },
@@ -206,39 +296,29 @@ final class HttpClient implements IHttpClient {
     String endpoint, {
     bool authenticate = false,
     Map<String, String>? headers,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
-  }) async {
-    return _sendRequest(
+  }) {
+    return sendRequest(
       (client) async {
-        final completeQueryParams = <String, dynamic>{};
-        final completeHeaders = <String, String>{};
+        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+        final completeQueryParams = await getCompleteQueryParameters(
+          authenticate,
+          queryParameters,
+        );
 
-        // Authenticating the request based on the [IHttpAuthorizationHandler]
-        if (authenticate) {
-          if (options.authorizationHandler.authorizationType.isHeaders) {
-            completeHeaders.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
+        // Generating the complete headers base on the [IHttpAuthorizationHandler]
+        final completeHeaders = await getCompleteHeaders(
+          authenticate,
+          headers,
+        );
 
-          if (options.authorizationHandler.authorizationType.isQueryParams) {
-            completeQueryParams.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
-        }
-
-        if (headers != null) {
-          completeHeaders.addAll(headers);
-        }
-
-        // Creating URI
-        final uri = UriUtils.create(
-          replaceBaseUrl ?? options.baseUrl,
-          endpoint: endpoint,
+        // Generating URI
+        final uri = getUri(
+          endpoint,
+          replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
         );
 
@@ -250,38 +330,18 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        HttpRequest? request;
-
-        if (httpResponse.request != null) {
-          request = HttpRequest.fromBaseRequest(
-            httpResponse.request!,
-            segment: segment,
-            step: step,
-          );
-        }
-
-        // Custom reconizeException method from the [IHttpExceptionHandler]
-        options.exceptionHandler.reconizeException(
-          httpResponse.statusCode,
-          httpResponse.reasonPhrase,
-          StackTrace.current,
-          request: request,
-        );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = HttpResponse.fromResponse(
+        validateIfResponseShouldBeTreatedAsException(
           httpResponse,
           segment: segment,
           step: step,
         );
 
-        // Logging response
-        if (options.showLogs) {
-          options.responseHandler.logResponse(response);
-        }
-
-        // Custom onResponse method from the [IHttpResponseHandler]
-        options.responseHandler.onResponse(response);
+        // Parsing the [http.Response] into a [HttpResponse]
+        final response = parseHttpResponse(
+          httpResponse,
+          segment: segment,
+          step: step,
+        );
 
         return response;
       },
@@ -293,39 +353,29 @@ final class HttpClient implements IHttpClient {
     String endpoint, {
     bool authenticate = false,
     Map<String, String>? headers,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
-  }) async {
-    return _sendRequest(
+  }) {
+    return sendRequest(
       (client) async {
-        final completeQueryParams = <String, dynamic>{};
-        final completeHeaders = <String, String>{};
+        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+        final completeQueryParams = await getCompleteQueryParameters(
+          authenticate,
+          queryParameters,
+        );
 
-        // Authenticating the request based on the [IHttpAuthorizationHandler]
-        if (authenticate) {
-          if (options.authorizationHandler.authorizationType.isHeaders) {
-            completeHeaders.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
+        // Generating the complete headers base on the [IHttpAuthorizationHandler]
+        final completeHeaders = await getCompleteHeaders(
+          authenticate,
+          headers,
+        );
 
-          if (options.authorizationHandler.authorizationType.isQueryParams) {
-            completeQueryParams.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
-        }
-
-        if (headers != null) {
-          completeHeaders.addAll(headers);
-        }
-
-        // Creating URI
-        final uri = UriUtils.create(
-          replaceBaseUrl ?? options.baseUrl,
-          endpoint: endpoint,
+        // Generating URI
+        final uri = getUri(
+          endpoint,
+          replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
         );
 
@@ -337,38 +387,18 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        HttpRequest? request;
-
-        if (httpResponse.request != null) {
-          request = HttpRequest.fromBaseRequest(
-            httpResponse.request!,
-            segment: segment,
-            step: step,
-          );
-        }
-
-        // Custom reconizeException method from the [IHttpExceptionHandler]
-        options.exceptionHandler.reconizeException(
-          httpResponse.statusCode,
-          httpResponse.reasonPhrase,
-          StackTrace.current,
-          request: request,
-        );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = HttpResponse.fromResponse(
+        validateIfResponseShouldBeTreatedAsException(
           httpResponse,
           segment: segment,
           step: step,
         );
 
-        // Logging response
-        if (options.showLogs) {
-          options.responseHandler.logResponse(response);
-        }
-
-        // Custom onResponse method from the [IHttpResponseHandler]
-        options.responseHandler.onResponse(response);
+        // Parsing the [http.Response] into a [HttpResponse]
+        final response = parseHttpResponse(
+          httpResponse,
+          segment: segment,
+          step: step,
+        );
 
         return response;
       },
@@ -381,39 +411,29 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
-  }) async {
-    return _sendRequest(
+  }) {
+    return sendRequest(
       (client) async {
-        final completeQueryParams = <String, dynamic>{};
-        final completeHeaders = <String, String>{};
+        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+        final completeQueryParams = await getCompleteQueryParameters(
+          authenticate,
+          queryParameters,
+        );
 
-        // Authenticating the request based on the [IHttpAuthorizationHandler]
-        if (authenticate) {
-          if (options.authorizationHandler.authorizationType.isHeaders) {
-            completeHeaders.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
+        // Generating the complete headers base on the [IHttpAuthorizationHandler]
+        final completeHeaders = await getCompleteHeaders(
+          authenticate,
+          headers,
+        );
 
-          if (options.authorizationHandler.authorizationType.isQueryParams) {
-            completeQueryParams.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
-        }
-
-        if (headers != null) {
-          completeHeaders.addAll(headers);
-        }
-
-        // Creating URI
-        final uri = UriUtils.create(
-          replaceBaseUrl ?? options.baseUrl,
-          endpoint: endpoint,
+        // Generating URI
+        final uri = getUri(
+          endpoint,
+          replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
         );
 
@@ -426,38 +446,18 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        HttpRequest? request;
-
-        if (httpResponse.request != null) {
-          request = HttpRequest.fromBaseRequest(
-            httpResponse.request!,
-            segment: segment,
-            step: step,
-          );
-        }
-
-        // Custom reconizeException method from the [IHttpExceptionHandler]
-        options.exceptionHandler.reconizeException(
-          httpResponse.statusCode,
-          httpResponse.reasonPhrase,
-          StackTrace.current,
-          request: request,
-        );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = HttpResponse.fromResponse(
+        validateIfResponseShouldBeTreatedAsException(
           httpResponse,
           segment: segment,
           step: step,
         );
 
-        // Logging response
-        if (options.showLogs) {
-          options.responseHandler.logResponse(response);
-        }
-
-        // Custom onResponse method from the [IHttpResponseHandler]
-        options.responseHandler.onResponse(response);
+        // Parsing the [http.Response] into a [HttpResponse]
+        final response = parseHttpResponse(
+          httpResponse,
+          segment: segment,
+          step: step,
+        );
 
         return response;
       },
@@ -470,39 +470,29 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
-  }) async {
-    return _sendRequest(
+  }) {
+    return sendRequest(
       (client) async {
-        final completeQueryParams = <String, dynamic>{};
-        final completeHeaders = <String, String>{};
+        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+        final completeQueryParams = await getCompleteQueryParameters(
+          authenticate,
+          queryParameters,
+        );
 
-        // Authenticating the request based on the [IHttpAuthorizationHandler]
-        if (authenticate) {
-          if (options.authorizationHandler.authorizationType.isHeaders) {
-            completeHeaders.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
+        // Generating the complete headers base on the [IHttpAuthorizationHandler]
+        final completeHeaders = await getCompleteHeaders(
+          authenticate,
+          headers,
+        );
 
-          if (options.authorizationHandler.authorizationType.isQueryParams) {
-            completeQueryParams.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
-        }
-
-        if (headers != null) {
-          completeHeaders.addAll(headers);
-        }
-
-        // Creating URI
-        final uri = UriUtils.create(
-          replaceBaseUrl ?? options.baseUrl,
-          endpoint: endpoint,
+        // Generating URI
+        final uri = getUri(
+          endpoint,
+          replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
         );
 
@@ -515,38 +505,18 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        HttpRequest? request;
-
-        if (httpResponse.request != null) {
-          request = HttpRequest.fromBaseRequest(
-            httpResponse.request!,
-            segment: segment,
-            step: step,
-          );
-        }
-
-        // Custom reconizeException method from the [IHttpExceptionHandler]
-        options.exceptionHandler.reconizeException(
-          httpResponse.statusCode,
-          httpResponse.reasonPhrase,
-          StackTrace.current,
-          request: request,
-        );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = HttpResponse.fromResponse(
+        validateIfResponseShouldBeTreatedAsException(
           httpResponse,
           segment: segment,
           step: step,
         );
 
-        // Logging response
-        if (options.showLogs) {
-          options.responseHandler.logResponse(response);
-        }
-
-        // Custom onResponse method from the [IHttpResponseHandler]
-        options.responseHandler.onResponse(response);
+        // Parsing the [http.Response] into a [HttpResponse]
+        final response = parseHttpResponse(
+          httpResponse,
+          segment: segment,
+          step: step,
+        );
 
         return response;
       },
@@ -559,39 +529,29 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, dynamic>? queryParameters,
+    Map<String, String>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
-  }) async {
-    return _sendRequest(
+  }) {
+    return sendRequest(
       (client) async {
-        final completeQueryParams = <String, dynamic>{};
-        final completeHeaders = <String, String>{};
+        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+        final completeQueryParams = await getCompleteQueryParameters(
+          authenticate,
+          queryParameters,
+        );
 
-        // Authenticating the request based on the [IHttpAuthorizationHandler]
-        if (authenticate) {
-          if (options.authorizationHandler.authorizationType.isHeaders) {
-            completeHeaders.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
+        // Generating the complete headers base on the [IHttpAuthorizationHandler]
+        final completeHeaders = await getCompleteHeaders(
+          authenticate,
+          headers,
+        );
 
-          if (options.authorizationHandler.authorizationType.isQueryParams) {
-            completeQueryParams.addAll(
-              await options.authorizationHandler.getAuthorization(),
-            );
-          }
-        }
-
-        if (headers != null) {
-          completeHeaders.addAll(headers);
-        }
-
-        // Creating URI
-        final uri = UriUtils.create(
-          replaceBaseUrl ?? options.baseUrl,
-          endpoint: endpoint,
+        // Generating URI
+        final uri = getUri(
+          endpoint,
+          replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
         );
 
@@ -604,38 +564,18 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        HttpRequest? request;
-
-        if (httpResponse.request != null) {
-          request = HttpRequest.fromBaseRequest(
-            httpResponse.request!,
-            segment: segment,
-            step: step,
-          );
-        }
-
-        // Custom reconizeException method from the [IHttpExceptionHandler]
-        options.exceptionHandler.reconizeException(
-          httpResponse.statusCode,
-          httpResponse.reasonPhrase,
-          StackTrace.current,
-          request: request,
-        );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = HttpResponse.fromResponse(
+        validateIfResponseShouldBeTreatedAsException(
           httpResponse,
           segment: segment,
           step: step,
         );
 
-        // Logging response
-        if (options.showLogs) {
-          options.responseHandler.logResponse(response);
-        }
-
-        // Custom onResponse method from the [IHttpResponseHandler]
-        options.responseHandler.onResponse(response);
+        // Parsing the [http.Response] into a [HttpResponse]
+        final response = parseHttpResponse(
+          httpResponse,
+          segment: segment,
+          step: step,
+        );
 
         return response;
       },

@@ -15,7 +15,7 @@
 import '../entities/entities.dart' show HttpOptions;
 
 /// Class to implement the methods that handle errors.
-abstract base class IHttpErrorHandler {
+abstract interface class IHttpErrorHandler {
   const IHttpErrorHandler();
 
   /// Method that prints the [Error] on terminal if the [HttpOptions.showLogs] is true.

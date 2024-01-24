@@ -16,10 +16,8 @@ import '../entities/entities.dart' show HttpResponse;
 
 /// Class to implement the methods that handle the flow of refreshing authorization tokens.
 abstract interface class IHttpRefreshHandler {
-  const IHttpRefreshHandler();
-
   /// The specific status code when the [refreshTokenAndRetryRequest] will be executed.
-  int get statusCode;
+  int statusCode();
 
   /// The method that will handle the refresh of the authorization tokens and retry the request that
   /// triggered the action.

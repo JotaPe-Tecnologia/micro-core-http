@@ -12,4 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-void main() {}
+import 'package:http_parser/http_parser.dart';
+
+/// This class represents the [MediaType] class from the [http_parser](https://pub.dev/packages/http_parser) library.
+final class HttpMediaType extends MediaType {
+  HttpMediaType(super.type, super.subtype, [super.parameters]);
+}
