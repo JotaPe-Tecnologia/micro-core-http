@@ -25,6 +25,7 @@
 ## Coming Soon
 
 -   Download Request passing the path of the file to be downloaded to
+-   Improvements on Retry Request Flow
 -   Improvements on Refresh Token Interceptor to make easier to implement
 
 ## Usage
