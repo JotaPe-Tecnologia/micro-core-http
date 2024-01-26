@@ -13,21 +13,22 @@
 // limitations under the License.
 
 import 'package:http/http.dart' as http;
-import 'package:micro_core_http/src/clients/http_client.dart';
+import 'package:micro_core_http/micro_core_http.dart';
 import 'package:micro_core_http/src/clients/http_intercept_client.dart';
-import 'package:micro_core_http/src/entities/http_exception.dart';
-import 'package:micro_core_http/src/entities/http_options.dart';
-import 'package:micro_core_http/src/entities/http_response.dart';
 import 'package:micro_core_http/src/entities/http_streamed_response.dart';
-import 'package:micro_core_http/src/exceptions/http_exception_bad_request.dart';
-import 'package:micro_core_http/src/exceptions/http_exception_unauthorized.dart';
-import 'package:micro_core_http/src/interfaces/http_client_interface.dart';
-import 'package:micro_core_http/src/interfaces/http_error_handler_interface.dart';
-import 'package:micro_core_http/src/interfaces/http_exception_handler_interface.dart';
-import 'package:micro_core_http/src/interfaces/http_refresh_handler_interface.dart';
 import 'package:micro_core_http/src/utils/constants.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+
+final class MockHeaderAuthorizationHandler extends Mock implements IHttpAuthorizationHandler {
+  @override
+  HttpAuthorizationType get authorizationType => HttpAuthorizationType.headers;
+}
+
+final class MockQueryAuthorizationHandler extends Mock implements IHttpAuthorizationHandler {
+  @override
+  HttpAuthorizationType get authorizationType => HttpAuthorizationType.queryParams;
+}
 
 final class MockClient extends Mock implements http.Client {}
 
@@ -36,6 +37,8 @@ final class MockErrorHandler extends Mock implements IHttpErrorHandler {}
 final class MockExceptionHandler extends Mock implements IHttpExceptionHandler {}
 
 final class MockRefreshHandler extends Mock implements IHttpRefreshHandler {}
+
+final class MockResponseHandler extends Mock implements IHttpResponseHandler {}
 
 void main() {
   const baseUrl = 'https://api.jotapetecnologia.com.br';
@@ -572,70 +575,637 @@ void main() {
       );
 
       group(
-        'getCompleteHeaders() |',
+        'createUri() |',
         () {
-          late final http.Client customClient;
+          test(
+            'Should return a Uri with HttpOptions.baseUrl when replaceBaseUrl is null',
+            () async {
+              // Arrange
+              const endpoint = '/endpoint';
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              // Act
+              final uri = client.createUri(
+                endpoint,
+              );
+
+              // Assert
+              expect(uri.toString(), equals('${options.baseUrl}$endpoint'));
+            },
+          );
+
+          test(
+            'Should return a Uri with replaceBaseUrl when replaceBaseUrl is not null',
+            () async {
+              // Arrange
+              const endpoint = '/endpoint';
+              const replaceBaseUrl = 'https://api-dev.jotapetecnologia.com.br';
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              // Act
+              final uri = client.createUri(
+                endpoint,
+                replaceBaseUrl: replaceBaseUrl,
+              );
+
+              // Assert
+              expect(uri.toString(), isNot(equals('${options.baseUrl}$endpoint')));
+              expect(uri.toString(), equals('$replaceBaseUrl$endpoint'));
+            },
+          );
+
+          test(
+            'Should return a Uri with HttpOptions.baseUrl when replaceBaseUrl is an empty String',
+            () async {
+              // Arrange
+              const endpoint = '/endpoint';
+              const replaceBaseUrl = '';
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              // Act
+              final uri = client.createUri(
+                endpoint,
+                replaceBaseUrl: replaceBaseUrl,
+              );
+
+              // Assert
+              expect(uri.toString(), equals('${options.baseUrl}$endpoint'));
+              expect(uri.toString(), isNot(equals('$replaceBaseUrl$endpoint')));
+            },
+          );
+
+          test(
+            'Should return a Uri with queryParameters when queryParameters are not null',
+            () async {
+              // Arrange
+              const endpoint = '/endpoint';
+              const queryParameters = {'name': 'João'};
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              // Act
+              final uri = client.createUri(
+                endpoint,
+                queryParameters: queryParameters,
+              );
+
+              // Assert
+              expect(uri.queryParameters, equals(queryParameters));
+            },
+          );
+        },
+      );
+
+      group(
+        'parseHttpResponse() |',
+        () {
+          late final IHttpResponseHandler responseHandler;
 
           setUpAll(() {
-            customClient = MockClient();
+            responseHandler = MockResponseHandler();
           });
 
           setUp(() {
-            // registerFallbackValue(HttpExceptionUnauthorized());
-            // registerFallbackValue(TypeError());
-            // registerFallbackValue(StackTrace.current);
             registerFallbackValue(
-              Uri.parse('$baseUrl/endpoint?name=João'),
+              HttpResponse(
+                data: {'name': 'João'},
+                headers: Constants.applicationJsonHeaders,
+                statusCode: 200,
+              ),
             );
           });
 
           tearDown(() {
-            reset(customClient);
-            // reset(errorHandler);
-            // reset(exceptionHandler);
+            reset(responseHandler);
             resetMocktailState();
           });
 
           test(
-            'Should return a HttpResponse when gets a successfull response',
+            'Should call the IHttpResponseHandler.logResponse callback when HttpOptions.showLogs is true and response is successfully parsed',
             () async {
               // Arrange
-              const body = "";
-              const headers = Constants.applicationJsonHeaders;
-              const queryParams = {'name': 'João'};
-              const statusCode = 200;
-              when(
-                () => customClient.delete(
-                  any(),
-                  body: any(named: 'body'),
-                  headers: any(named: 'headers'),
-                  encoding: any(named: 'encoding'),
-                ),
-              ).thenAnswer(
-                (_) async => http.Response(
-                  body,
-                  statusCode,
-                  headers: headers,
-                  request: http.Request(
-                    'DELETE',
-                    Uri.parse('$baseUrl/endpoint'),
-                  ),
-                ),
+              when(() => responseHandler.logResponse(any()));
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                responseHandler: responseHandler,
+                showLogs: true,
               );
-              final options = HttpOptions(baseUrl: baseUrl);
-              final client = HttpClient(options: options, customClient: customClient);
+              final client = HttpClient(options: options);
 
               // Act
-              final response = await client.delete(
-                '/endpoint',
-                body: body,
-                headers: headers,
-                queryParameters: queryParams,
+              client.parseHttpResponse(http.Response('{"name": "João"}', 200));
+
+              // Assert
+              verify(
+                () => options.responseHandler.logResponse(any()),
+              ).called(equals(1));
+            },
+          );
+
+          test(
+            'Should not call the IHttpResponseHandler.logResponse callback when HttpOptions.showLogs is false and response is successfully parsed',
+            () async {
+              // Arrange
+              when(() => responseHandler.logResponse(any()));
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                responseHandler: responseHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              client.parseHttpResponse(http.Response('{"name": "João"}', 200));
+
+              // Assert
+              verifyNever(() => options.responseHandler.logResponse(any()));
+            },
+          );
+
+          test(
+            'Should always call the IHttpResponseHandler.onResponse callback when response is successfully parsed',
+            () async {
+              // Arrange
+              when(() => responseHandler.onResponse(any()));
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                responseHandler: responseHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              client.parseHttpResponse(http.Response('{"name": "João"}', 200));
+
+              // Assert
+              verify(
+                () => options.responseHandler.onResponse(any()),
+              ).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when response is successfully parsed',
+            () async {
+              // Arrange
+              when(() => responseHandler.onResponse(any()));
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                responseHandler: responseHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final response = client.parseHttpResponse(http.Response('{"name": "João"}', 200));
+
+              // Assert
+              expect(response, isA<HttpResponse>());
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+              expect(response.step, isNull);
+              expect(response.segment, isNull);
+            },
+          );
+
+          test(
+            'Should return a HttpResponse with step and segment when they are passed',
+            () async {
+              // Arrange
+              when(() => responseHandler.onResponse(any()));
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                responseHandler: responseHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final response = client.parseHttpResponse(
+                http.Response('{"name": "João"}', 200),
+                segment: 'segment',
+                step: 'step',
               );
 
               // Assert
-              expect(response.statusCode, equals(statusCode));
-              verify(() => customClient.delete(any())).called(1);
+              expect(response, isA<HttpResponse>());
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+              expect(response.step, equals('step'));
+              expect(response.segment, equals('segment'));
+            },
+          );
+        },
+      );
+
+      group(
+        'validateIfResponseShouldBeTreatedAsException() |',
+        () {
+          late final IHttpExceptionHandler exceptionHandler;
+
+          setUpAll(() {
+            exceptionHandler = MockExceptionHandler();
+          });
+
+          setUp(() {
+            registerFallbackValue(StackTrace.current);
+            registerFallbackValue(HttpKnownException(code: 400, reason: 'reason'));
+            registerFallbackValue(http.Request('GET', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(exceptionHandler);
+            resetMocktailState();
+          });
+
+          test(
+            'Should throw a HttpException without HttpRequest when HttpResponse has the right statusCode',
+            () async {
+              // Arrange
+              const body = '{"name": "João"}';
+              const reasonPhrase = 'reasonPhrase';
+              const statusCode = 400;
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              try {
+                // Act
+                client.validateIfResponseShouldBeTreatedAsException(
+                  http.Response(
+                    body,
+                    statusCode,
+                    headers: Constants.applicationJsonHeaders,
+                    reasonPhrase: reasonPhrase,
+                  ),
+                );
+              } on HttpExceptionBadRequest catch (exception) {
+                // Assert
+                expect(exception.statusCode, equals(statusCode));
+                expect(exception.description?.trim(), equals(reasonPhrase));
+                expect(exception.request, isNull);
+              }
+            },
+          );
+
+          test(
+            'Should throw a HttpException with HttpRequest, and without segment, and step when HttpResponse has the right statusCode',
+            () async {
+              // Arrange
+              const body = '{"name": "João"}';
+              const reasonPhrase = 'reasonPhrase';
+              const statusCode = 400;
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              try {
+                // Act
+                client.validateIfResponseShouldBeTreatedAsException(
+                  http.Response(
+                    body,
+                    statusCode,
+                    headers: Constants.applicationJsonHeaders,
+                    reasonPhrase: reasonPhrase,
+                    request: http.Request(
+                      'GET',
+                      Uri.parse('$baseUrl/endpoint'),
+                    ),
+                  ),
+                );
+              } on HttpExceptionBadRequest catch (exception) {
+                // Assert
+                expect(exception.statusCode, equals(statusCode));
+                expect(exception.description?.trim(), equals(reasonPhrase));
+                expect(exception.request, isNotNull);
+                expect(exception.request?.method, equals('GET'));
+                expect(exception.request?.url.toString(), equals('$baseUrl/endpoint'));
+                expect(exception.request?.segment, isNull);
+                expect(exception.request?.step, isNull);
+              }
+            },
+          );
+
+          test(
+            'Should throw a HttpException with HttpRequest, segment, and step when HttpResponse has the right statusCode',
+            () async {
+              // Arrange
+              const body = '{"name": "João"}';
+              const reasonPhrase = 'reasonPhrase';
+              const statusCode = 400;
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options);
+
+              try {
+                // Act
+                client.validateIfResponseShouldBeTreatedAsException(
+                  http.Response(
+                    body,
+                    statusCode,
+                    headers: Constants.applicationJsonHeaders,
+                    reasonPhrase: reasonPhrase,
+                    request: http.Request(
+                      'GET',
+                      Uri.parse('$baseUrl/endpoint'),
+                    ),
+                  ),
+                  segment: 'segment',
+                  step: 'step',
+                );
+              } on HttpExceptionBadRequest catch (exception) {
+                // Assert
+                expect(exception.statusCode, equals(statusCode));
+                expect(exception.description?.trim(), equals(reasonPhrase));
+                expect(exception.request, isNotNull);
+                expect(exception.request?.method, equals('GET'));
+                expect(exception.request?.url.toString(), equals('$baseUrl/endpoint'));
+                expect(exception.request?.segment, equals('segment'));
+                expect(exception.request?.step, equals('step'));
+              }
+            },
+          );
+
+          test(
+            'Should always call the IHttpExceptionHandler.reconizeCustomExceptions callback',
+            () async {
+              // Arrange
+              when(
+                () => exceptionHandler.reconizeCustomExceptions(
+                  any(),
+                  any(),
+                  any(),
+                  suggestedException: any(named: 'suggestedException'),
+                  request: any(named: 'request'),
+                ),
+              );
+              const body = '{"name": "João"}';
+              const reasonPhrase = 'reasonPhrase';
+              const statusCode = 400;
+              final options = HttpOptions(baseUrl: baseUrl, exceptionHandler: exceptionHandler);
+              final client = HttpClient(options: options);
+
+              // Act
+              client.validateIfResponseShouldBeTreatedAsException(
+                http.Response(
+                  body,
+                  statusCode,
+                  headers: Constants.applicationJsonHeaders,
+                  reasonPhrase: reasonPhrase,
+                  request: http.Request(
+                    'GET',
+                    Uri.parse('$baseUrl/endpoint'),
+                  ),
+                ),
+                segment: 'segment',
+                step: 'step',
+              );
+
+              verify(
+                () => exceptionHandler.reconizeCustomExceptions(
+                  any(),
+                  any(),
+                  any(),
+                  suggestedException: any(named: 'suggestedException'),
+                  request: any(named: 'request'),
+                ),
+              ).called(equals(1));
+            },
+          );
+        },
+      );
+
+      group(
+        'getCompleteHeaders() |',
+        () {
+          late final IHttpAuthorizationHandler headerAuthorizationHandler;
+          late final IHttpAuthorizationHandler queryAuthorizationHandler;
+
+          setUpAll(() {
+            headerAuthorizationHandler = MockHeaderAuthorizationHandler();
+            queryAuthorizationHandler = MockQueryAuthorizationHandler();
+          });
+
+          setUp(() {
+            registerFallbackValue(HttpAuthorizationType.noAuthorization);
+          });
+
+          tearDown(() {
+            reset(headerAuthorizationHandler);
+            reset(queryAuthorizationHandler);
+            resetMocktailState();
+          });
+
+          test(
+            'Should return an empty Map<String, String> when authenticate is false and headers is null',
+            () async {
+              // Arrange
+              const authenticate = false;
+              final Map<String, String>? headers = null;
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: headerAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeHeaders = await client.getCompleteHeaders(
+                authenticate,
+                headers,
+              );
+
+              // Assert
+              expect(completeHeaders, equals({}));
+            },
+          );
+
+          test(
+            'Should return an empty Map<String, String> when authenticate is true, authorizationType is not headers, and headers is null',
+            () async {
+              // Arrange
+              const authenticate = true;
+              final Map<String, String>? headers = null;
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: queryAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeHeaders = await client.getCompleteHeaders(
+                authenticate,
+                headers,
+              );
+
+              // Assert
+              expect(completeHeaders, equals({}));
+            },
+          );
+
+          test(
+            'Should return a Map<String, String> that has the same data as headers when authenticate is true, authorizationType is not headers, and headers is not null',
+            () async {
+              // Arrange
+              const authenticate = true;
+              const headers = {'name': 'João'};
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: queryAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeHeaders = await client.getCompleteHeaders(
+                authenticate,
+                headers,
+              );
+
+              // Assert
+              expect(completeHeaders, equals(headers));
+            },
+          );
+
+          test(
+            'Should return a Map<String, String> with authentication data when authenticate is true, authorizationType is headers',
+            () async {
+              // Arrange
+              const authorization = {'name': 'João'};
+              when(
+                () => headerAuthorizationHandler.getAuthorization(),
+              ).thenAnswer((_) async => authorization);
+              const authenticate = true;
+              const headers = {'age': '25'};
+              const expected = {...authorization, ...headers};
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: headerAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeHeaders = await client.getCompleteHeaders(
+                authenticate,
+                headers,
+              );
+
+              // Assert
+              expect(completeHeaders, equals(expected));
+            },
+          );
+        },
+      );
+
+      group(
+        'getCompleteQueryParameters() |',
+        () {
+          late final IHttpAuthorizationHandler headerAuthorizationHandler;
+          late final IHttpAuthorizationHandler queryAuthorizationHandler;
+
+          setUpAll(() {
+            headerAuthorizationHandler = MockHeaderAuthorizationHandler();
+            queryAuthorizationHandler = MockQueryAuthorizationHandler();
+          });
+
+          setUp(() {
+            registerFallbackValue(HttpAuthorizationType.noAuthorization);
+          });
+
+          tearDown(() {
+            reset(headerAuthorizationHandler);
+            reset(queryAuthorizationHandler);
+            resetMocktailState();
+          });
+
+          test(
+            'Should return an empty Map<String, String> when authenticate is false and queryParameters is null',
+            () async {
+              // Arrange
+              const authenticate = false;
+              final Map<String, String>? queryParameters = null;
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: queryAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeQueryParameters = await client.getCompleteQueryParameters(
+                authenticate,
+                queryParameters,
+              );
+
+              // Assert
+              expect(completeQueryParameters, equals({}));
+            },
+          );
+
+          test(
+            'Should return an empty Map<String, String> when authenticate is true, authorizationType is not queryParameters, and queryParameters is null',
+            () async {
+              // Arrange
+              const authenticate = true;
+              final Map<String, String>? queryParameters = null;
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: headerAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeQueryParameters = await client.getCompleteQueryParameters(
+                authenticate,
+                queryParameters,
+              );
+
+              // Assert
+              expect(completeQueryParameters, equals({}));
+            },
+          );
+
+          test(
+            'Should return a Map<String, String> that has the same data as queryParameters when authenticate is true, authorizationType is not queryParameters, and queryParameters is not null',
+            () async {
+              // Arrange
+              const authenticate = true;
+              const queryParameters = {'name': 'João'};
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: headerAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeQueryParameters = await client.getCompleteQueryParameters(
+                authenticate,
+                queryParameters,
+              );
+
+              // Assert
+              expect(completeQueryParameters, equals(queryParameters));
+            },
+          );
+
+          test(
+            'Should return a Map<String, String> with authentication data when authenticate is true, authorizationType is queryParameters',
+            () async {
+              // Arrange
+              const authorization = {'name': 'João'};
+              when(
+                () => queryAuthorizationHandler.getAuthorization(),
+              ).thenAnswer((_) async => authorization);
+              const authenticate = true;
+              const queryParameters = {'age': '25'};
+              const expected = {...authorization, ...queryParameters};
+              final options = HttpOptions(
+                baseUrl: baseUrl,
+                authorizationHandler: queryAuthorizationHandler,
+              );
+              final client = HttpClient(options: options);
+
+              // Act
+              final completeQueryParameters = await client.getCompleteQueryParameters(
+                authenticate,
+                queryParameters,
+              );
+
+              // Assert
+              expect(completeQueryParameters, equals(expected));
             },
           );
         },

@@ -129,11 +129,9 @@ final class HttpClient implements IHttpClient {
     final completeHeaders = <String, String>{};
 
     // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isHeaders) {
-        final authorizationHeaders = await options.authorizationHandler.getAuthorization();
-        completeHeaders.addAll(authorizationHeaders);
-      }
+    if (authenticate && options.authorizationHandler.authorizationType.isHeaders) {
+      final authorizationHeaders = await options.authorizationHandler.getAuthorization();
+      completeHeaders.addAll(authorizationHeaders);
     }
 
     if (headers != null) {
@@ -150,11 +148,9 @@ final class HttpClient implements IHttpClient {
     final completeQueryParams = <String, String>{};
 
     // Authenticating the request based on the [IHttpAuthorizationHandler]
-    if (authenticate) {
-      if (options.authorizationHandler.authorizationType.isQueryParams) {
-        final authorizationQueryParams = await options.authorizationHandler.getAuthorization();
-        completeQueryParams.addAll(authorizationQueryParams);
-      }
+    if (authenticate && options.authorizationHandler.authorizationType.isQueryParams) {
+      final authorizationQueryParams = await options.authorizationHandler.getAuthorization();
+      completeQueryParams.addAll(authorizationQueryParams);
     }
 
     if (queryParameters != null) {
@@ -164,13 +160,21 @@ final class HttpClient implements IHttpClient {
     return completeQueryParams;
   }
 
-  Uri getUri(
+  Uri createUri(
     String endpoint, {
     String? replaceBaseUrl,
     Map<String, String>? queryParameters,
   }) {
+    if (replaceBaseUrl != null && replaceBaseUrl.isNotEmpty) {
+      return UriUtils.create(
+        replaceBaseUrl,
+        endpoint: endpoint,
+        queryParameters: queryParameters,
+      );
+    }
+
     return UriUtils.create(
-      replaceBaseUrl ?? options.baseUrl,
+      options.baseUrl,
       endpoint: endpoint,
       queryParameters: queryParameters,
     );
@@ -258,7 +262,7 @@ final class HttpClient implements IHttpClient {
         );
 
         // Generating URI
-        final uri = getUri(
+        final uri = createUri(
           endpoint,
           replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
@@ -316,7 +320,7 @@ final class HttpClient implements IHttpClient {
         );
 
         // Generating URI
-        final uri = getUri(
+        final uri = createUri(
           endpoint,
           replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
@@ -373,7 +377,7 @@ final class HttpClient implements IHttpClient {
         );
 
         // Generating URI
-        final uri = getUri(
+        final uri = createUri(
           endpoint,
           replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
@@ -431,7 +435,7 @@ final class HttpClient implements IHttpClient {
         );
 
         // Generating URI
-        final uri = getUri(
+        final uri = createUri(
           endpoint,
           replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
@@ -490,7 +494,7 @@ final class HttpClient implements IHttpClient {
         );
 
         // Generating URI
-        final uri = getUri(
+        final uri = createUri(
           endpoint,
           replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,
@@ -549,7 +553,7 @@ final class HttpClient implements IHttpClient {
         );
 
         // Generating URI
-        final uri = getUri(
+        final uri = createUri(
           endpoint,
           replaceBaseUrl: replaceBaseUrl,
           queryParameters: completeQueryParams,

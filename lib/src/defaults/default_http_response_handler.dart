@@ -16,7 +16,7 @@ import '../entities/http_response.dart';
 import '../interfaces/http_response_handler_interface.dart';
 
 /// Class that implements the methods that handle responses.
-final class DefaultHttpResponseHandler extends IHttpResponseHandler {
+final class DefaultHttpResponseHandler implements IHttpResponseHandler {
   const DefaultHttpResponseHandler();
 
   @override
