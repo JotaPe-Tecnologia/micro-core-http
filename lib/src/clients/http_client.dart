@@ -141,7 +141,7 @@ final class HttpClient implements IHttpClient {
     return completeHeaders;
   }
 
-  Future<Map<String, String>> getCompleteQueryParameters(
+  Future<Map<String, String>?> getCompleteQueryParameters(
     bool authenticate,
     Map<String, String>? queryParameters,
   ) async {
@@ -157,7 +157,7 @@ final class HttpClient implements IHttpClient {
       completeQueryParams.addAll(queryParameters);
     }
 
-    return completeQueryParams;
+    return completeQueryParams.isEmpty ? null : completeQueryParams;
   }
 
   Uri createUri(
@@ -236,6 +236,52 @@ final class HttpClient implements IHttpClient {
     );
   }
 
+  Future<(Uri, Map<String, String>)> getRequestAttributes(
+    String endpoint,
+    bool authenticate, {
+    Map<String, String>? headers,
+    Map<String, String>? queryParameters,
+    String? replaceBaseUrl,
+  }) async {
+    final requestAttributes = await Future.wait([
+      // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
+      getCompleteHeaders(authenticate, headers),
+
+      // Generating the complete headers base on the [IHttpAuthorizationHandler]
+      getCompleteQueryParameters(authenticate, queryParameters),
+    ]);
+
+    // Generating URI
+    final uri = createUri(
+      endpoint,
+      replaceBaseUrl: replaceBaseUrl,
+      queryParameters: requestAttributes[1],
+    );
+
+    return (uri, requestAttributes[0] ?? {});
+  }
+
+  HttpResponse validateExceptionAndParseResponse(
+    http.Response httpResponse, {
+    String? segment,
+    String? step,
+  }) {
+    validateIfResponseShouldBeTreatedAsException(
+      httpResponse,
+      segment: segment,
+      step: step,
+    );
+
+    // Parsing the [http.Response] into a [HttpResponse]
+    final response = parseHttpResponse(
+      httpResponse,
+      segment: segment,
+      step: step,
+    );
+
+    return response;
+  }
+
   @override
   Future<HttpResponse> delete(
     String endpoint, {
@@ -249,23 +295,13 @@ final class HttpClient implements IHttpClient {
   }) {
     return sendRequest(
       (client) async {
-        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
-        final completeQueryParams = await getCompleteQueryParameters(
-          authenticate,
-          queryParameters,
-        );
-
-        // Generating the complete headers base on the [IHttpAuthorizationHandler]
-        final completeHeaders = await getCompleteHeaders(
-          authenticate,
-          headers,
-        );
-
-        // Generating URI
-        final uri = createUri(
+        // Getting Uri and Headers
+        final (uri, completeHeaders) = await getRequestAttributes(
           endpoint,
+          authenticate,
+          headers: headers,
+          queryParameters: queryParameters,
           replaceBaseUrl: replaceBaseUrl,
-          queryParameters: completeQueryParams,
         );
 
         // Sending the request
@@ -277,20 +313,11 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        validateIfResponseShouldBeTreatedAsException(
+        return validateExceptionAndParseResponse(
           httpResponse,
           segment: segment,
           step: step,
         );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = parseHttpResponse(
-          httpResponse,
-          segment: segment,
-          step: step,
-        );
-
-        return response;
       },
     );
   }
@@ -307,23 +334,13 @@ final class HttpClient implements IHttpClient {
   }) {
     return sendRequest(
       (client) async {
-        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
-        final completeQueryParams = await getCompleteQueryParameters(
-          authenticate,
-          queryParameters,
-        );
-
-        // Generating the complete headers base on the [IHttpAuthorizationHandler]
-        final completeHeaders = await getCompleteHeaders(
-          authenticate,
-          headers,
-        );
-
-        // Generating URI
-        final uri = createUri(
+        // Getting Uri and Headers
+        final (uri, completeHeaders) = await getRequestAttributes(
           endpoint,
+          authenticate,
+          headers: headers,
+          queryParameters: queryParameters,
           replaceBaseUrl: replaceBaseUrl,
-          queryParameters: completeQueryParams,
         );
 
         // Sending the request
@@ -334,20 +351,11 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        validateIfResponseShouldBeTreatedAsException(
+        return validateExceptionAndParseResponse(
           httpResponse,
           segment: segment,
           step: step,
         );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = parseHttpResponse(
-          httpResponse,
-          segment: segment,
-          step: step,
-        );
-
-        return response;
       },
     );
   }
@@ -364,23 +372,13 @@ final class HttpClient implements IHttpClient {
   }) {
     return sendRequest(
       (client) async {
-        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
-        final completeQueryParams = await getCompleteQueryParameters(
-          authenticate,
-          queryParameters,
-        );
-
-        // Generating the complete headers base on the [IHttpAuthorizationHandler]
-        final completeHeaders = await getCompleteHeaders(
-          authenticate,
-          headers,
-        );
-
-        // Generating URI
-        final uri = createUri(
+        // Getting Uri and Headers
+        final (uri, completeHeaders) = await getRequestAttributes(
           endpoint,
+          authenticate,
+          headers: headers,
+          queryParameters: queryParameters,
           replaceBaseUrl: replaceBaseUrl,
-          queryParameters: completeQueryParams,
         );
 
         // Sending the request
@@ -391,20 +389,11 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        validateIfResponseShouldBeTreatedAsException(
+        return validateExceptionAndParseResponse(
           httpResponse,
           segment: segment,
           step: step,
         );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = parseHttpResponse(
-          httpResponse,
-          segment: segment,
-          step: step,
-        );
-
-        return response;
       },
     );
   }
@@ -422,23 +411,13 @@ final class HttpClient implements IHttpClient {
   }) {
     return sendRequest(
       (client) async {
-        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
-        final completeQueryParams = await getCompleteQueryParameters(
-          authenticate,
-          queryParameters,
-        );
-
-        // Generating the complete headers base on the [IHttpAuthorizationHandler]
-        final completeHeaders = await getCompleteHeaders(
-          authenticate,
-          headers,
-        );
-
-        // Generating URI
-        final uri = createUri(
+        // Getting Uri and Headers
+        final (uri, completeHeaders) = await getRequestAttributes(
           endpoint,
+          authenticate,
+          headers: headers,
+          queryParameters: queryParameters,
           replaceBaseUrl: replaceBaseUrl,
-          queryParameters: completeQueryParams,
         );
 
         // Sending the request
@@ -450,20 +429,11 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        validateIfResponseShouldBeTreatedAsException(
+        return validateExceptionAndParseResponse(
           httpResponse,
           segment: segment,
           step: step,
         );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = parseHttpResponse(
-          httpResponse,
-          segment: segment,
-          step: step,
-        );
-
-        return response;
       },
     );
   }
@@ -481,23 +451,13 @@ final class HttpClient implements IHttpClient {
   }) {
     return sendRequest(
       (client) async {
-        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
-        final completeQueryParams = await getCompleteQueryParameters(
-          authenticate,
-          queryParameters,
-        );
-
-        // Generating the complete headers base on the [IHttpAuthorizationHandler]
-        final completeHeaders = await getCompleteHeaders(
-          authenticate,
-          headers,
-        );
-
-        // Generating URI
-        final uri = createUri(
+        // Getting Uri and Headers
+        final (uri, completeHeaders) = await getRequestAttributes(
           endpoint,
+          authenticate,
+          headers: headers,
+          queryParameters: queryParameters,
           replaceBaseUrl: replaceBaseUrl,
-          queryParameters: completeQueryParams,
         );
 
         // Sending the request
@@ -509,20 +469,11 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        validateIfResponseShouldBeTreatedAsException(
+        return validateExceptionAndParseResponse(
           httpResponse,
           segment: segment,
           step: step,
         );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = parseHttpResponse(
-          httpResponse,
-          segment: segment,
-          step: step,
-        );
-
-        return response;
       },
     );
   }
@@ -540,23 +491,13 @@ final class HttpClient implements IHttpClient {
   }) {
     return sendRequest(
       (client) async {
-        // Generating the complete query parameters base on the [IHttpAuthorizationHandler]
-        final completeQueryParams = await getCompleteQueryParameters(
-          authenticate,
-          queryParameters,
-        );
-
-        // Generating the complete headers base on the [IHttpAuthorizationHandler]
-        final completeHeaders = await getCompleteHeaders(
-          authenticate,
-          headers,
-        );
-
-        // Generating URI
-        final uri = createUri(
+        // Getting Uri and Headers
+        final (uri, completeHeaders) = await getRequestAttributes(
           endpoint,
+          authenticate,
+          headers: headers,
+          queryParameters: queryParameters,
           replaceBaseUrl: replaceBaseUrl,
-          queryParameters: completeQueryParams,
         );
 
         // Sending the request
@@ -568,20 +509,11 @@ final class HttpClient implements IHttpClient {
           step: step,
         );
 
-        validateIfResponseShouldBeTreatedAsException(
+        return validateExceptionAndParseResponse(
           httpResponse,
           segment: segment,
           step: step,
         );
-
-        // Parsing the [http.Response] into a [HttpResponse]
-        final response = parseHttpResponse(
-          httpResponse,
-          segment: segment,
-          step: step,
-        );
-
-        return response;
       },
     );
   }

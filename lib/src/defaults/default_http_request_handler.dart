@@ -16,7 +16,7 @@ import '../entities/entities.dart' show HttpBaseRequest;
 import '../interfaces/http_request_handler_interface.dart';
 
 /// Class that implements the methods that handle requests.
-final class DefaultHttpRequestHandler extends IHttpRequestHandler {
+final class DefaultHttpRequestHandler implements IHttpRequestHandler {
   const DefaultHttpRequestHandler();
 
   @override

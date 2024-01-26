@@ -16,8 +16,6 @@ import '../entities/entities.dart' show HttpOptions, HttpResponse;
 
 /// Class to implement the methods that handle responses.
 abstract interface class IHttpResponseHandler {
-  const IHttpResponseHandler();
-
   /// Method that prints the [HttpResponse] on terminal if the [HttpOptions.showLogs] is true.
   void logResponse(HttpResponse response);
 

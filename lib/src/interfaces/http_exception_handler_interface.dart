@@ -17,8 +17,6 @@ import '../exceptions/exceptions.dart';
 
 /// Class to implement the methods that handle exceptions.
 abstract interface class IHttpExceptionHandler {
-  const IHttpExceptionHandler();
-
   static HttpKnownException? reconizeLibExceptions(
     int statusCode, {
     String? description,

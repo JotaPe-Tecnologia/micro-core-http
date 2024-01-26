@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:micro_core_http/micro_core_http.dart';
 import 'package:micro_core_http/src/clients/http_intercept_client.dart';
@@ -1113,7 +1115,7 @@ void main() {
           });
 
           test(
-            'Should return an empty Map<String, String> when authenticate is false and queryParameters is null',
+            'Should return null when authenticate is false and queryParameters is null',
             () async {
               // Arrange
               const authenticate = false;
@@ -1131,12 +1133,12 @@ void main() {
               );
 
               // Assert
-              expect(completeQueryParameters, equals({}));
+              expect(completeQueryParameters, isNull);
             },
           );
 
           test(
-            'Should return an empty Map<String, String> when authenticate is true, authorizationType is not queryParameters, and queryParameters is null',
+            'Should return null when authenticate is true, authorizationType is not queryParameters, and queryParameters is null',
             () async {
               // Arrange
               const authenticate = true;
@@ -1154,7 +1156,7 @@ void main() {
               );
 
               // Assert
-              expect(completeQueryParameters, equals({}));
+              expect(completeQueryParameters, isNull);
             },
           );
 
@@ -1206,6 +1208,576 @@ void main() {
 
               // Assert
               expect(completeQueryParameters, equals(expected));
+            },
+          );
+        },
+      );
+
+      group(
+        'delete() |',
+        () {
+          late final http.Client customClient;
+
+          setUpAll(() {
+            customClient = MockClient();
+          });
+
+          setUp(() {
+            registerFallbackValue(Uri.parse('$baseUrl/endpoint'));
+            registerFallbackValue(Utf8Codec());
+            registerFallbackValue(http.Request('DELETE', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(customClient);
+            resetMocktailState();
+          });
+
+          test(
+            'Should call http.Client.send() when delete() is called',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              await client.delete('/endpoint');
+
+              // Assert
+              verify(() => customClient.send(any())).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when receives a response with the right statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              final response = await client.delete('/endpoint');
+
+              // Assert
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+            },
+          );
+
+          test(
+            'Should throw a HttpException when receives a response with the wrong statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                400,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              try {
+                // Act
+                await client.delete('/endpoint');
+              } on HttpException catch (exception) {
+                // Assert
+                expect(exception, isA<HttpExceptionBadRequest>());
+                expect(exception.statusCode, equals(400));
+              }
+            },
+          );
+        },
+      );
+
+      group(
+        'get() |',
+        () {
+          late final http.Client customClient;
+
+          setUpAll(() {
+            customClient = MockClient();
+          });
+
+          setUp(() {
+            registerFallbackValue(Uri.parse('$baseUrl/endpoint'));
+            registerFallbackValue(Utf8Codec());
+            registerFallbackValue(http.Request('GET', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(customClient);
+            resetMocktailState();
+          });
+
+          test(
+            'Should call http.Client.send() when get() is called',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              await client.get('/endpoint');
+
+              // Assert
+              verify(() => customClient.send(any())).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when receives a response with the right statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              final response = await client.get('/endpoint');
+
+              // Assert
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+            },
+          );
+
+          test(
+            'Should throw a HttpException when receives a response with the wrong statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                400,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              try {
+                // Act
+                await client.get('/endpoint');
+              } on HttpException catch (exception) {
+                // Assert
+                expect(exception, isA<HttpExceptionBadRequest>());
+                expect(exception.statusCode, equals(400));
+              }
+            },
+          );
+        },
+      );
+
+      group(
+        'head() |',
+        () {
+          late final http.Client customClient;
+
+          setUpAll(() {
+            customClient = MockClient();
+          });
+
+          setUp(() {
+            registerFallbackValue(Uri.parse('$baseUrl/endpoint'));
+            registerFallbackValue(Utf8Codec());
+            registerFallbackValue(http.Request('HEAD', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(customClient);
+            resetMocktailState();
+          });
+
+          test(
+            'Should call http.Client.send() when head() is called',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              await client.head('/endpoint');
+
+              // Assert
+              verify(() => customClient.send(any())).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when receives a response with the right statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              final response = await client.head('/endpoint');
+
+              // Assert
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+            },
+          );
+
+          test(
+            'Should throw a HttpException when receives a response with the wrong statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                400,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              try {
+                // Act
+                await client.head('/endpoint');
+              } on HttpException catch (exception) {
+                // Assert
+                expect(exception, isA<HttpExceptionBadRequest>());
+                expect(exception.statusCode, equals(400));
+              }
+            },
+          );
+        },
+      );
+
+      group(
+        'patch() |',
+        () {
+          late final http.Client customClient;
+
+          setUpAll(() {
+            customClient = MockClient();
+          });
+
+          setUp(() {
+            registerFallbackValue(Uri.parse('$baseUrl/endpoint'));
+            registerFallbackValue(Utf8Codec());
+            registerFallbackValue(http.Request('PATCH', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(customClient);
+            resetMocktailState();
+          });
+
+          test(
+            'Should call http.Client.send() when patch() is called',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              await client.patch('/endpoint');
+
+              // Assert
+              verify(() => customClient.send(any())).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when receives a response with the right statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              final response = await client.patch('/endpoint');
+
+              // Assert
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+            },
+          );
+
+          test(
+            'Should throw a HttpException when receives a response with the wrong statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                400,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              try {
+                // Act
+                await client.patch('/endpoint');
+              } on HttpException catch (exception) {
+                // Assert
+                expect(exception, isA<HttpExceptionBadRequest>());
+                expect(exception.statusCode, equals(400));
+              }
+            },
+          );
+        },
+      );
+
+      group(
+        'post() |',
+        () {
+          late final http.Client customClient;
+
+          setUpAll(() {
+            customClient = MockClient();
+          });
+
+          setUp(() {
+            registerFallbackValue(Uri.parse('$baseUrl/endpoint'));
+            registerFallbackValue(Utf8Codec());
+            registerFallbackValue(http.Request('POST', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(customClient);
+            resetMocktailState();
+          });
+
+          test(
+            'Should call http.Client.send() when post() is called',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              await client.post('/endpoint');
+
+              // Assert
+              verify(() => customClient.send(any())).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when receives a response with the right statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              final response = await client.post('/endpoint');
+
+              // Assert
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+            },
+          );
+
+          test(
+            'Should throw a HttpException when receives a response with the wrong statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                400,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              try {
+                // Act
+                await client.post('/endpoint');
+              } on HttpException catch (exception) {
+                // Assert
+                expect(exception, isA<HttpExceptionBadRequest>());
+                expect(exception.statusCode, equals(400));
+              }
+            },
+          );
+        },
+      );
+
+      group(
+        'put() |',
+        () {
+          late final http.Client customClient;
+
+          setUpAll(() {
+            customClient = MockClient();
+          });
+
+          setUp(() {
+            registerFallbackValue(Uri.parse('$baseUrl/endpoint'));
+            registerFallbackValue(Utf8Codec());
+            registerFallbackValue(http.Request('PUT', Uri.parse('$baseUrl/endpoint')));
+          });
+
+          tearDown(() {
+            reset(customClient);
+            resetMocktailState();
+          });
+
+          test(
+            'Should call http.Client.send() when put() is called',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              await client.put('/endpoint');
+
+              // Assert
+              verify(() => customClient.send(any())).called(equals(1));
+            },
+          );
+
+          test(
+            'Should return a HttpResponse when receives a response with the right statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                200,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              // Act
+              final response = await client.put('/endpoint');
+
+              // Assert
+              expect(response.statusCode, equals(200));
+              expect(response.data, equals({'name': 'João'}));
+            },
+          );
+
+          test(
+            'Should throw a HttpException when receives a response with the wrong statusCode',
+            () async {
+              // Arrange
+              const value = [123, 34, 110, 97, 109, 101, 34, 58, 32, 34, 74, 111, 227, 111, 34, 125];
+              final streamedResponse = http.StreamedResponse(
+                Stream.value(value),
+                400,
+              );
+              when(
+                () => customClient.send(any()),
+              ).thenAnswer((_) async => streamedResponse);
+              final options = HttpOptions(baseUrl: baseUrl);
+              final client = HttpClient(options: options, customClient: customClient);
+
+              try {
+                // Act
+                await client.put('/endpoint');
+              } on HttpException catch (exception) {
+                // Assert
+                expect(exception, isA<HttpExceptionBadRequest>());
+                expect(exception.statusCode, equals(400));
+              }
             },
           );
         },
