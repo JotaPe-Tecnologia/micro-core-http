@@ -32,7 +32,7 @@
 
 ### Basic Usage
 
-> example/basic/micro_core_basic_example.dart
+> micro_core_basic_example.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -402,7 +402,7 @@ final class HttpAdapter implements IHttpAdapter {
 }
 ```
 
-> example/complete/micro_core_complete_example.dart
+> micro_core_complete_example.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';

@@ -1,3 +1,7 @@
+## 0.0.2
+
+* Updating documentation.
+
 ## 0.0.1
 
 * Basic HTTP Requests (DELETE, GET, PATCH, POST, PUT)

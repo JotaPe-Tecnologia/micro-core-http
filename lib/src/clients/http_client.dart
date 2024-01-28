@@ -26,10 +26,12 @@ final class HttpClient implements IHttpClient {
   /// All the configuration needed to define the behavior of the HTTP clients.
   final HttpOptions options;
 
+  /// Custom HTTP client to override the inner client.
   final http.Client? customClient;
 
   const HttpClient({required this.options, this.customClient});
 
+  /// Method that handles a [Error].
   void handleError(Error error, StackTrace stackTrace) {
     // Logging error
     if (options.showLogs) {
@@ -40,6 +42,9 @@ final class HttpClient implements IHttpClient {
     options.errorHandler.onError(error, stackTrace);
   }
 
+  /// Method that handles the [HttpException] and returns a [HttpResponse].
+  ///
+  /// Also executes the [IHttpRefreshHandler.refreshTokenAndRetryRequest] flow.
   Future<HttpResponse> handleException(
     HttpException exception,
     StackTrace stackTrace,
@@ -122,6 +127,7 @@ final class HttpClient implements IHttpClient {
     }
   }
 
+  /// Method that generates the complete headers base on the [IHttpAuthorizationHandler] and the headers passed.
   Future<Map<String, String>> getCompleteHeaders(
     bool authenticate,
     Map<String, String>? headers,
@@ -141,6 +147,7 @@ final class HttpClient implements IHttpClient {
     return completeHeaders;
   }
 
+  /// Method that generates the complete query parameters base on the [IHttpAuthorizationHandler] and the query parameters passed.
   Future<Map<String, dynamic>?> getCompleteQueryParameters(
     bool authenticate,
     Map<String, dynamic>? queryParameters,
@@ -160,6 +167,9 @@ final class HttpClient implements IHttpClient {
     return completeQueryParams.isEmpty ? null : completeQueryParams;
   }
 
+  /// Method that creates the [Uri] based on the [baseUrl] and the [endpoint].
+  /// 
+  /// Also handles the override of baseUrl with [replaceBaseUrl].
   Uri createUri(
     String endpoint, {
     String? replaceBaseUrl,
@@ -180,6 +190,9 @@ final class HttpClient implements IHttpClient {
     );
   }
 
+  /// Method that parses the [http.Response] into a [HttpResponse].
+  /// 
+  /// Also executes the [IHttpResponseHandler.logResponse] and [IHttpResponseHandler.onResponse] methods.
   HttpResponse parseHttpResponse(
     http.Response httpResponse, {
     String? segment,
@@ -203,6 +216,7 @@ final class HttpClient implements IHttpClient {
     return response;
   }
 
+  /// Method that validates if the [http.Response] should be treated as an [HttpException] based on its status code.
   void validateIfResponseShouldBeTreatedAsException(
     http.Response httpResponse, {
     String? segment,
@@ -236,6 +250,7 @@ final class HttpClient implements IHttpClient {
     );
   }
 
+  /// Method that generates the [Uri] and the complete headers.
   Future<(Uri, Map<String, String>)> getRequestAttributes(
     String endpoint,
     bool authenticate, {
@@ -261,6 +276,7 @@ final class HttpClient implements IHttpClient {
     return (uri, requestAttributes[0] as Map<String, String>);
   }
 
+  /// Method that executes the [validateIfResponseShouldBeTreatedAsException] and [parseHttpResponse] methods.
   HttpResponse validateExceptionAndParseResponse(
     http.Response httpResponse, {
     String? segment,

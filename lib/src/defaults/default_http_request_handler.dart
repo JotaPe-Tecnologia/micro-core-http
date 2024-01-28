@@ -23,5 +23,6 @@ final class DefaultHttpRequestHandler implements IHttpRequestHandler {
   void logRequest(HttpBaseRequest request) => print(request);
 
   @override
-  void onRequest(HttpBaseRequest request) {}
+  void onRequest(HttpBaseRequest request) {
+  }
 }
