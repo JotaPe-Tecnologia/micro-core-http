@@ -36,6 +36,7 @@ final class HttpExceptionUnsupportedMediaType extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionUnsupportedMediaType copyWith({
     int? code,
     String? description,

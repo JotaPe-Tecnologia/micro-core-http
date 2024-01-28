@@ -36,6 +36,7 @@ final class HttpExceptionForbidden extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionForbidden copyWith({
     int? code,
     String? description,

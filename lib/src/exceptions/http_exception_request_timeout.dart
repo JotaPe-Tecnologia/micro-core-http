@@ -36,6 +36,7 @@ final class HttpExceptionRequestTimeout extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionRequestTimeout copyWith({
     int? code,
     String? description,

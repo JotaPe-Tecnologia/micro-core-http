@@ -46,6 +46,7 @@ final class HttpMultipartFile {
   }
 
   @override
+  /// Returns a string representation of this object.
   String toString() {
     return '''
 [ HttpMultipartFile ] ----------------------------------------

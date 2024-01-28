@@ -32,7 +32,7 @@
 
 ### Basic Usage
 
-> micro_core_basic_example.dart
+> micro_core_example.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -112,9 +112,9 @@ void main() {
 }
 ```
 
-### Complete Usage
+### Adapter Usage
 
-> example/complete/entities/default_http_options.dart
+> example/adapter/entities/default_http_options.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -143,7 +143,7 @@ final class DefaultHttpOptions {
 }
 ```
 
-> example/complete/interfaces/http_adapter_interface.dart
+> example/adapter/interfaces/http_adapter_interface.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -205,7 +205,7 @@ abstract interface class IHttpAdapter {
 }
 ```
 
-> example/complete/overrides/http_authorization_handler.dart
+> example/adapter/overrides/http_authorization_handler.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -230,7 +230,7 @@ final class AppHttpAuthorizationHandler implements IHttpAuthorizationHandler {
 }
 ```
 
-> example/complete/overrides/http_response_handler.dart
+> example/adapter/overrides/http_response_handler.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -250,7 +250,7 @@ final class HttpResponseHandler implements IHttpResponseHandler {
 }
 ```
 
-> example/complete/http_adapter.dart
+> example/adapter/http_adapter.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
@@ -402,7 +402,7 @@ final class HttpAdapter implements IHttpAdapter {
 }
 ```
 
-> micro_core_complete_example.dart
+> micro_core_adapter_example.dart
 
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';

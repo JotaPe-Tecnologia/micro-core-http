@@ -14,10 +14,10 @@
 
 import 'package:micro_core_http/micro_core_http.dart';
 
-import 'complete/entities/default_http_options.dart';
-import 'complete/http_adapter.dart';
-import 'complete/interfaces/http_adapter_interface.dart';
-import 'complete/overrides/http_authorization_handler.dart';
+import 'adapter/entities/default_http_options.dart';
+import 'adapter/http_adapter.dart';
+import 'adapter/interfaces/http_adapter_interface.dart';
+import 'adapter/overrides/http_authorization_handler.dart';
 
 final class Repository {
   final IHttpAdapter api;

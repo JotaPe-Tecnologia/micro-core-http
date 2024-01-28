@@ -77,6 +77,7 @@ final class HttpResponse {
   }
 
   @override
+  /// Returns a string representation of this object.
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     return '''

@@ -63,6 +63,33 @@ void main() {
           expect(exception.statusMessage, equals(statusMessage));
         },
       );
+      
+      test(
+        'Should be able to replace all attributes when calling copyWith()',
+        () {
+          // Arrange
+          const exception = HttpExceptionInternalServerError(
+            description: 'description',
+          );
+
+          // Assert
+          expect(exception.code, equals(500));
+          expect(exception.reason, equals('Internal Server Error'));
+          expect(exception.description?.trim(), equals('description'));
+
+          // Act
+          final newException = exception.copyWith(
+            code: 403,
+            reason: 'Forbidden',
+            description: 'new description',
+          );
+
+          // Assert
+          expect(newException.code, equals(403));
+          expect(newException.reason, equals('Forbidden'));
+          expect(newException.description?.trim(), equals('new description'));
+        },
+      );
     },
   );
 }

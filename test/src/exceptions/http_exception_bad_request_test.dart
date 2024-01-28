@@ -63,6 +63,33 @@ void main() {
           expect(exception.statusMessage, equals(statusMessage));
         },
       );
+      
+      test(
+        'Should be able to replace all attributes when calling copyWith()',
+        () {
+          // Arrange
+          const exception = HttpExceptionBadRequest(
+            description: 'description',
+          );
+
+          // Assert
+          expect(exception.code, equals(400));
+          expect(exception.reason, equals('Bad Request'));
+          expect(exception.description?.trim(), equals('description'));
+
+          // Act
+          final newException = exception.copyWith(
+            code: 500,
+            reason: 'Internal Server Error',
+            description: 'new description',
+          );
+
+          // Assert
+          expect(newException.code, equals(500));
+          expect(newException.reason, equals('Internal Server Error'));
+          expect(newException.description?.trim(), equals('new description'));
+        },
+      );
     },
   );
 }

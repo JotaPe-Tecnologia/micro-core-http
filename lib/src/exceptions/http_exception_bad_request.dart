@@ -36,6 +36,7 @@ final class HttpExceptionBadRequest extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionBadRequest copyWith({
     int? code,
     String? description,

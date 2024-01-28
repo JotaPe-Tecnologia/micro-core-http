@@ -36,6 +36,7 @@ final class HttpExceptionNotFound extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionNotFound copyWith({
     int? code,
     String? description,

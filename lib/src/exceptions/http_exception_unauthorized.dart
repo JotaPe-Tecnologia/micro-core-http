@@ -36,6 +36,7 @@ final class HttpExceptionUnauthorized extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionUnauthorized copyWith({
     int? code,
     String? description,

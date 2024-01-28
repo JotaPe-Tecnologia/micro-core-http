@@ -1,6 +1,6 @@
 name: micro_core_http
 description: This package is a wrapper of the http package with a handful of features outside the box.
-version: 0.0.2
+version: 0.0.3
 repository: https://github.com/JotaPe-Tecnologia/micro-core-http
 issue_tracker: https://github.com/JotaPe-Tecnologia/micro-core-http/issues
 homepage: https://www.jotapetecnologia.com.br/flutter/packages/micro_core_http

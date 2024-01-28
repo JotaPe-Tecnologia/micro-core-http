@@ -40,6 +40,7 @@ base class HttpKnownException extends HttpException implements Exception {
           statusMessage: '[ $code - $reason ]${description ?? ""}',
         );
 
+  /// Copy the current instance with some changes.
   HttpKnownException copyWith({
     int? code,
     String? description,
@@ -55,6 +56,7 @@ base class HttpKnownException extends HttpException implements Exception {
   }
 
   @override
+  /// Returns a string representation of this object.
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     return '''

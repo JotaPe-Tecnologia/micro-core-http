@@ -36,6 +36,7 @@ final class HttpExceptionInternalServerError extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionInternalServerError copyWith({
     int? code,
     String? description,

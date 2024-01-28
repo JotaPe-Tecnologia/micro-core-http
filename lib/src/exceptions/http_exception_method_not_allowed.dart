@@ -36,6 +36,7 @@ final class HttpExceptionMethodNotAllowed extends HttpKnownException {
         );
   
   @override
+  /// Copy the current instance with some changes.
   HttpExceptionMethodNotAllowed copyWith({
     int? code,
     String? description,

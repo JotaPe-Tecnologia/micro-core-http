@@ -1,3 +1,9 @@
+## 0.0.3
+
+* Adding example.
+* Adding some unit testes.
+* Updating documentation.
+
 ## 0.0.2
 
 * Updating documentation.

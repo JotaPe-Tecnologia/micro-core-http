@@ -34,6 +34,7 @@ final class HttpMultipartRequest extends http.MultipartRequest implements HttpBa
   });
 
   @override
+  /// Returns a string representation of this object.
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     return '''

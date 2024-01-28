@@ -48,6 +48,7 @@ final class HttpRequest extends http.Request implements HttpBaseRequest {
   }
 
   @override
+  /// Returns a string representation of this object.
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     return '''

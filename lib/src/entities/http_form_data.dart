@@ -65,6 +65,7 @@ final class HttpFormData {
   }
 
   @override
+  /// Returns a string representation of this object.
   String toString() {
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final dataAsMap = {for (final entry in data) entry.key: entry.value is HttpMultipartFile ? (entry.value as HttpMultipartFile).fileName : entry.value};
