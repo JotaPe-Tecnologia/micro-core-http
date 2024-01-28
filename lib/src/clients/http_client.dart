@@ -141,11 +141,11 @@ final class HttpClient implements IHttpClient {
     return completeHeaders;
   }
 
-  Future<Map<String, String>?> getCompleteQueryParameters(
+  Future<Map<String, dynamic>?> getCompleteQueryParameters(
     bool authenticate,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
   ) async {
-    final completeQueryParams = <String, String>{};
+    final completeQueryParams = <String, dynamic>{};
 
     // Authenticating the request based on the [IHttpAuthorizationHandler]
     if (authenticate && options.authorizationHandler.authorizationType.isQueryParams) {
@@ -163,7 +163,7 @@ final class HttpClient implements IHttpClient {
   Uri createUri(
     String endpoint, {
     String? replaceBaseUrl,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
   }) {
     if (replaceBaseUrl != null && replaceBaseUrl.isNotEmpty) {
       return UriUtils.create(
@@ -240,7 +240,7 @@ final class HttpClient implements IHttpClient {
     String endpoint,
     bool authenticate, {
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
   }) async {
     final requestAttributes = await Future.wait([
@@ -258,7 +258,7 @@ final class HttpClient implements IHttpClient {
       queryParameters: requestAttributes[1],
     );
 
-    return (uri, requestAttributes[0] ?? {});
+    return (uri, requestAttributes[0] as Map<String, String>);
   }
 
   HttpResponse validateExceptionAndParseResponse(
@@ -288,7 +288,7 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
@@ -327,7 +327,7 @@ final class HttpClient implements IHttpClient {
     String endpoint, {
     bool authenticate = false,
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
@@ -365,7 +365,7 @@ final class HttpClient implements IHttpClient {
     String endpoint, {
     bool authenticate = false,
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
@@ -404,7 +404,7 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
@@ -444,7 +444,7 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,
@@ -484,7 +484,7 @@ final class HttpClient implements IHttpClient {
     bool authenticate = false,
     dynamic body,
     Map<String, String>? headers,
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     String? replaceBaseUrl,
     String? segment,
     String? step,

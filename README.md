@@ -32,6 +32,8 @@
 
 ### Basic Usage
 
+> example/basic/micro_core_basic_example.dart
+
 ```dart
 import 'package:micro_core_http/micro_core_http.dart';
 
@@ -112,6 +114,350 @@ void main() {
 
 ### Complete Usage
 
+> example/complete/entities/default_http_options.dart
+
 ```dart
-print('dart code');
+import 'package:micro_core_http/micro_core_http.dart';
+
+import '../overrides/http_response_handler.dart';
+
+// * It could be created different options for each environment/feature of the app
+
+final class DefaultHttpOptions {
+  late final HttpOptions _options;
+  HttpOptions get options => _options;
+
+  DefaultHttpOptions(
+    IHttpAuthorizationHandler authorizationHandler,
+  ) {
+    _options = HttpOptions(
+      authorizationHandler: authorizationHandler,
+      baseUrl: 'https://api.jotapetecnologia.com.br',
+      delayBetweenRetries: const Duration(seconds: 2),
+      responseHandler: HttpResponseHandler(),
+      extraRetries: 2,
+      requestTimeout: const Duration(seconds: 12),
+      showLogs: true,
+    );
+  }
+}
+```
+
+> example/complete/interfaces/http_adapter_interface.dart
+
+```dart
+import 'package:micro_core_http/micro_core_http.dart';
+
+abstract interface class IHttpAdapter {
+  Future<HttpResponse> delete(
+    String endpoint, {
+    bool authenticate = false,
+    dynamic body,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  });
+
+  Future<HttpResponse> get(
+    String endpoint, {
+    bool authenticate = false,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  });
+
+  Future<HttpResponse> patch(
+    String endpoint, {
+    bool authenticate = false,
+    dynamic body,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  });
+
+  Future<HttpResponse> post(
+    String endpoint, {
+    bool authenticate = false,
+    dynamic body,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  });
+
+  Future<HttpResponse> put(
+    String endpoint, {
+    bool authenticate = false,
+    dynamic body,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  });
+}
+```
+
+> example/complete/overrides/http_authorization_handler.dart
+
+```dart
+import 'package:micro_core_http/micro_core_http.dart';
+
+final class AppHttpAuthorizationHandler implements IHttpAuthorizationHandler {
+  // Local Storage Instance
+
+  const AppHttpAuthorizationHandler();
+
+  // Define where to add the token
+  @override
+  HttpAuthorizationType get authorizationType => HttpAuthorizationType.headers;
+
+  @override
+  Future<Map<String, String>> getAuthorization() async {
+    // Use Local Storage Instance to return the Authorization Token
+    return {
+      'Authorization':
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMiLCJ1c2VybmFtZSI6IjE1NDk0NDkzNzA5IiwiZW1haWwiOiJqcDk4c21hcnRpbnNAZ21haWwuY29tIiwiaXAiOjAsImxvZ2luX3Rva2VuIjoib2trbGFlb2lxamg0N3p4bDU2bG8yIiwidHlwZSI6IkFQUCIsImlhdCI6MTcwMjk4OTIyMywiZXhwIjoxNzAyOTkyODIzfQ.pNqx0JTt9FC7xkGMHgcLZE1Ln71nTnhC-qpOXlYPfGM',
+    };
+  }
+}
+```
+
+> example/complete/overrides/http_response_handler.dart
+
+```dart
+import 'package:micro_core_http/micro_core_http.dart';
+
+final class HttpResponseHandler implements IHttpResponseHandler {
+  @override
+  void logResponse(HttpResponse response) {
+    if (response.statusCode > 199 && response.statusCode < 300) {
+      // return Logger.logSuccess(response.toString());
+    }
+
+    // return Logger.logWarning(response.toString());
+  }
+
+  @override
+  void onResponse(HttpResponse response) {}
+}
+```
+
+> example/complete/http_adapter.dart
+
+```dart
+import 'package:micro_core_http/micro_core_http.dart';
+
+import 'interfaces/http_adapter_interface.dart';
+
+final class HttpAdapter implements IHttpAdapter {
+  final HttpOptions options;
+
+  const HttpAdapter(this.options);
+
+  static const Map<String, String> defaultHeaders = {
+    "accept": "*/*",
+    "content-type": "application/json",
+  };
+
+  @override
+  Future<HttpResponse> delete(
+    String endpoint, {
+    bool authenticate = false,
+    dynamic body,
+    Map<String, String>? headers = defaultHeaders,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  }) {
+    final client = HttpClient(
+      options: options,
+    );
+
+    return client.delete(
+      endpoint,
+      authenticate: authenticate,
+      body: body,
+      headers: headers,
+      queryParameters: queryParameters,
+      replaceBaseUrl: replaceBaseUrl,
+      segment: segment,
+      step: step,
+    );
+  }
+
+  @override
+  Future<HttpResponse> get(
+    String endpoint, {
+    bool authenticate = false,
+    Map<String, String>? headers = defaultHeaders,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  }) {
+    final client = HttpClient(
+      options: options,
+    );
+
+    return client.get(
+      endpoint,
+      authenticate: authenticate,
+      headers: headers,
+      queryParameters: queryParameters,
+      replaceBaseUrl: replaceBaseUrl,
+      segment: segment,
+      step: step,
+    );
+  }
+
+  @override
+  Future<HttpResponse> patch(
+    String endpoint, {
+    bool authenticate = false,
+    body,
+    Map<String, String>? headers = defaultHeaders,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  }) {
+    final client = HttpClient(
+      options: options,
+    );
+
+    return client.patch(
+      endpoint,
+      authenticate: authenticate,
+      body: body,
+      headers: headers,
+      queryParameters: queryParameters,
+      replaceBaseUrl: replaceBaseUrl,
+      segment: segment,
+      step: step,
+    );
+  }
+
+  @override
+  Future<HttpResponse> post(
+    String endpoint, {
+    bool authenticate = false,
+    body,
+    Map<String, String>? headers = defaultHeaders,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  }) {
+    final client = HttpClient(
+      options: options,
+    );
+
+    return client.post(
+      endpoint,
+      authenticate: authenticate,
+      body: body,
+      headers: headers,
+      queryParameters: queryParameters,
+      replaceBaseUrl: replaceBaseUrl,
+      segment: segment,
+      step: step,
+    );
+  }
+
+  @override
+  Future<HttpResponse> put(
+    String endpoint, {
+    bool authenticate = false,
+    body,
+    Map<String, String>? headers = defaultHeaders,
+    Map<String, dynamic>? queryParameters,
+    String? replaceBaseUrl,
+    String? segment,
+    String? step,
+  }) {
+    final client = HttpClient(
+      options: options,
+    );
+
+    return client.put(
+      endpoint,
+      authenticate: authenticate,
+      body: body,
+      headers: headers,
+      queryParameters: queryParameters,
+      replaceBaseUrl: replaceBaseUrl,
+      segment: segment,
+      step: step,
+    );
+  }
+}
+```
+
+> example/complete/micro_core_complete_example.dart
+
+```dart
+import 'package:micro_core_http/micro_core_http.dart';
+
+import 'entities/default_http_options.dart';
+import 'http_adapter.dart';
+import 'interfaces/http_adapter_interface.dart';
+import 'overrides/http_authorization_handler.dart';
+
+final class Repository {
+  final IHttpAdapter api;
+
+  const Repository(this.api);
+
+  Future<Map<String, dynamic>> getPackagesList() async {
+    try {
+      // Implement the request
+      final response = await api.get(
+        '/packages',
+        segment: 'Packages',
+        step: 'Getting Packages List',
+      );
+
+      // Return the response
+      return Map<String, dynamic>.from(response.data);
+    } on HttpException catch (exception) {
+      // Treat basic/custom Exceptions here
+      if (exception is HttpExceptionUnauthorized) {
+        print('User is Unauthorized!');
+      }
+      rethrow;
+    }
+  }
+}
+
+class Controller {
+  final Repository _repository;
+
+  const Controller(this._repository);
+
+  Future<void> getPackagesList() async {
+    final result = await _repository.getPackagesList();
+
+    // Deal with the result
+    print(result.toString());
+  }
+}
+
+void main() {
+  final authorizationHandler = AppHttpAuthorizationHandler();
+  final defaultOptions = DefaultHttpOptions(authorizationHandler);
+  final api = HttpAdapter(defaultOptions.options);
+  final repository = Repository(api);
+  final controller = Controller(repository);
+
+  controller.getPackagesList();
+}
 ```

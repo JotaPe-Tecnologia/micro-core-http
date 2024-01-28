@@ -15,6 +15,7 @@
 export 'http_base_request.dart';
 export 'http_exception.dart';
 export 'http_form_data.dart';
+export 'http_media_type.dart';
 export 'http_multipart_file.dart';
 export 'http_multipart_request.dart';
 export 'http_options.dart';
