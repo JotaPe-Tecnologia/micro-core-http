@@ -9,7 +9,7 @@ on:
 
 env:
   GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-  DART_VERSION: "3.2.3"
+  DART_VERSION: "3.2.4"
 
 jobs:
   production:

@@ -17,7 +17,6 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:micro_core_http/src/clients/http_intercept_client.dart';
 import 'package:micro_core_http/src/defaults/default_http_request_handler.dart';
-import 'package:micro_core_http/src/entities/http_media_type.dart';
 import 'package:micro_core_http/src/entities/http_streamed_response.dart';
 import 'package:micro_core_http/src/micro_core_http.dart';
 import 'package:mocktail/mocktail.dart';
