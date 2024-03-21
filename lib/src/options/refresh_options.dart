@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'clients/http_client_impl.dart';
-export 'entities/http_exception.dart';
-export 'entities/http_response.dart';
-export 'interceptors/interceptors.dart';
-export 'interfaces/http_client.dart';
-export 'options/options.dart';
+import 'package:dio/dio.dart' as dio;
 
-/// 0 - Metadata
-/// 1 - Tests
-/// 2 - Pinning
+/// Class of configuration options to refresh the authentication tokens.
+final class RefreshOptions {
+  /// The future to refresh the authentication tokens.
+  final Future<void> Function(dio.Dio client) refreshTokens;
+
+  /// The status code to refresh the authentication tokens.
+  final int statusCodeToRefresh;
+
+  const RefreshOptions({
+    required this.refreshTokens,
+    this.statusCodeToRefresh = 401,
+  });
+}

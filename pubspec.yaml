@@ -1,19 +1,26 @@
 name: micro_core_http
-description: This package is a wrapper of the http package with a handful of features outside the box.
-version: 0.0.3
+description: This package is a wrapper of the dio package with a handful of features outside the box.
+version: 0.0.4
 repository: https://github.com/JotaPe-Tecnologia/micro-core-http
 issue_tracker: https://github.com/JotaPe-Tecnologia/micro-core-http/issues
 homepage: https://www.jotapetecnologia.com.br/flutter/packages/micro_core_http
 
 environment:
-  sdk: ^3.2.3
+  sdk: ">=3.2.3 <4.0.0"
+  flutter: ">=1.17.0"
 
 dependencies:
-  http: ^1.1.2
+  dio: ^5.4.1
+  flutter:
+    sdk: flutter
   http_parser: ^4.0.2
+  micro_core_logger: ^0.1.0
 
 dev_dependencies:
-  lints: ^3.0.0
-  test: ^1.25.0
   coverage: ^1.7.2
+  flutter_lints: ^3.0.0
+  flutter_test:
+    sdk: flutter
   mocktail: ^1.0.2
+
+flutter:

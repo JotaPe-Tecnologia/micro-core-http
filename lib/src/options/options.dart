@@ -12,13 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'clients/http_client_impl.dart';
-export 'entities/http_exception.dart';
-export 'entities/http_response.dart';
-export 'interceptors/interceptors.dart';
-export 'interfaces/http_client.dart';
-export 'options/options.dart';
-
-/// 0 - Metadata
-/// 1 - Tests
-/// 2 - Pinning
+export './authorization_options.dart';
+export './refresh_options.dart';
+export './retry_options.dart';
+export './timeout_options.dart';

@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'clients/http_client_impl.dart';
-export 'entities/http_exception.dart';
-export 'entities/http_response.dart';
-export 'interceptors/interceptors.dart';
-export 'interfaces/http_client.dart';
-export 'options/options.dart';
+part of '../options/authorization_options.dart';
 
-/// 0 - Metadata
-/// 1 - Tests
-/// 2 - Pinning
+/// The type of authorization to add on the request.
+///
+/// The [header] type adds the authorization token on the request header.
+///
+/// The [queryParameter] type adds the authorization token on the request query
+/// parameter.
+enum AuthorizationTypeEnum { header, queryParameter }

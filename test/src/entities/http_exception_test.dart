@@ -12,51 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:dio/dio.dart' as dio;
+import 'package:flutter_test/flutter_test.dart';
 import 'package:micro_core_http/src/entities/http_exception.dart';
-import 'package:test/test.dart';
 
 void main() {
   group(
-    'HttpException |',
+    'extendability |',
     () {
-      group(
-        'statusCode |',
+      test(
+        'Should create a DioException when creating a HttpException',
         () {
-          test(
-            'Should return an instance if has a valid statusCode',
-            () {
-              // Arrange
-              const validStatusCode = 400;
-
-              // Act
-              final result = HttpException(
-                statusCode: validStatusCode,
-                statusMessage: 'statusMessage',
-              );
-
-              // Assert
-              expect(result, isA<HttpException>());
-            },
+          // Arrange - Act
+          final exception = HttpException(
+            requestOptions: dio.RequestOptions(),
           );
 
-          test(
-            'Should throw an AssertionError if has a invalid statusCode',
-            () {
-              // Arrange
-              const invalidStatusCode = 0;
+          // Assert
+          expect(exception, isA<dio.DioException>());
+        },
+      );
+    },
+  );
 
-              try {
-                // Act
-                final _ = HttpException(
-                  statusCode: invalidStatusCode,
-                  statusMessage: 'statusMessage',
-                );
-              } on AssertionError catch (error) {
-                // Assert
-                expect(error.message, equals('[ HttpException ] > Invalid Error Status Code'));
-              }
-            },
+  group(
+    'fromDioException() |',
+    () {
+      test(
+        'Should return a HttpException with correct data when parsing a DioException',
+        () {
+          // Arrange
+          const requestPath = '/v1/path';
+          final dioException = dio.DioException(
+            requestOptions: dio.RequestOptions(path: requestPath),
           );
+
+          // Act
+          final httpException = HttpException.fromDioException(dioException);
+
+          // Assert
+          expect(httpException, isA<HttpException>());
+          expect(httpException.requestOptions.path, equals(requestPath));
         },
       );
     },

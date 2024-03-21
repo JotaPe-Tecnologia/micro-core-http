@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'clients/http_client_impl.dart';
-export 'entities/http_exception.dart';
-export 'entities/http_response.dart';
-export 'interceptors/interceptors.dart';
-export 'interfaces/http_client.dart';
-export 'options/options.dart';
+/// Class of configuration options to retry a failed request given a condition.
+final class RetryOptions {
+  /// The number of times the request should be retried.
+  final int retries;
 
-/// 0 - Metadata
-/// 1 - Tests
-/// 2 - Pinning
+  /// The interval before a retry is performed.
+  final Duration retryInterval;
+
+  /// The function that determines if the request should be retried.
+  final bool Function(int? statusCode, dynamic data) shouldRetry;
+
+  const RetryOptions({
+    required this.retries,
+    required this.retryInterval,
+    required this.shouldRetry,
+  });
+}

@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'clients/http_client_impl.dart';
-export 'entities/http_exception.dart';
-export 'entities/http_response.dart';
-export 'interceptors/interceptors.dart';
-export 'interfaces/http_client.dart';
-export 'options/options.dart';
+/// Class of configuration options to throw a timeout exception during a HTTP request.
+final class TimeoutOptions {
+  /// The timeout duration to connect to the server.
+  final Duration connectTimeout;
 
-/// 0 - Metadata
-/// 1 - Tests
-/// 2 - Pinning
+  /// The timeout duration to receive data from the server.
+  final Duration receiveTimeout;
+
+  /// The timeout duration to send data to the server.
+  final Duration sendTimeout;
+
+  const TimeoutOptions({
+    this.connectTimeout = const Duration(seconds: 3),
+    this.receiveTimeout = const Duration(seconds: 12),
+    this.sendTimeout = const Duration(seconds: 9),
+  });
+}

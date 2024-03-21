@@ -12,86 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart' as dio;
 
 /// Class that represents the response of a HTTP's request.
-final class HttpResponse {
-  /// The data on the body of this response.
-  final dynamic data;
-
-  /// The HTTP headers returned by the server.
-  final Map<String, String> headers;
-
-  /// If the response was triggered by a redirect.
-  final bool isRedirect;
-
-  /// Whether the server requested that a persistent connection be maintained.
-  final bool persistentConnection;
-
-  /// The HTTP request that triggered this response.
-  final http.BaseRequest? request;
-
+final class HttpResponse<T> extends dio.Response<T> {
   /// Optional description of the module/service that the request is supposed to hit.
   final String? segment;
-
-  /// The HTTP status code for this response.
-  final int statusCode;
-
-  /// The HTTP status code for this response.
-  final String? statusMessage;
 
   /// Optional description of what the request is supposed to do.
   final String? step;
 
   HttpResponse({
-    required this.data,
-    required this.headers,
-    this.isRedirect = false,
-    this.persistentConnection = true,
-    this.request,
+    required super.requestOptions,
+    super.data,
+    super.statusCode,
+    super.statusMessage,
+    super.isRedirect = false,
+    super.redirects = const [],
+    Map<String, dynamic>? extra,
+    dio.Headers? headers,
     this.segment,
-    required this.statusCode,
-    this.statusMessage,
     this.step,
   });
 
-  /// Factory that creates a [HttpResponse] from a [http.Response].
-  factory HttpResponse.fromResponse(
-    http.Response response, {
+  /// Factory that creates a [HttpResponse] from a [dio.Response].
+  factory HttpResponse.fromDioResponse(
+    dio.Response<T> response, {
     String? segment,
     String? step,
   }) {
-    return HttpResponse(
-      data: jsonDecode(response.body),
-      headers: response.headers,
-      isRedirect: response.isRedirect,
-      persistentConnection: response.persistentConnection,
-      request: response.request,
-      segment: segment,
+    return HttpResponse<T>(
+      requestOptions: response.requestOptions,
+      data: response.data,
       statusCode: response.statusCode,
-      statusMessage: response.reasonPhrase,
+      statusMessage: response.statusMessage,
+      isRedirect: response.isRedirect,
+      redirects: response.redirects,
+      extra: response.extra,
+      headers: response.headers,
+      segment: segment,
       step: step,
     );
-  }
-
-  @override
-  /// Returns a string representation of this object.
-  String toString() {
-    JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    return '''
-[ HttpResponse ] > A HttpResponse was received!
-[ HttpResponse ] - Method          | ${request?.method.toUpperCase()}
-[ HttpResponse ] - Base URL        | ${request?.url.origin}
-[ HttpResponse ] - Endpoint        | ${request?.url.path}
-[ HttpResponse ] - Status Code     | $statusCode
-[ HttpResponse ] - Status Message  | $statusMessage
-[ HttpResponse ] - Headers         | ${encoder.convert(headers)}
-[ HttpResponse ] - Data            | ${encoder.convert(data)}
-[ HttpResponse ] - Segment         | $segment
-[ HttpResponse ] - Step            | $step
-[ HttpResponse ] -----------------------------------------
-''';
   }
 }

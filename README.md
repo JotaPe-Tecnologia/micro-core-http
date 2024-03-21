@@ -7,7 +7,7 @@
 
 ---
 
-## This package is a wrapper of the http package with a handful of features out of the box.
+## This package is a wrapper of the dio package with a handful of features out of the box.
 
 ## Platform Support
 

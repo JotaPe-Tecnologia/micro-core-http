@@ -1,3 +1,7 @@
+## 0.0.4
+
+* Migrating to DIO.
+
 ## 0.0.3
 
 * Adding example.
