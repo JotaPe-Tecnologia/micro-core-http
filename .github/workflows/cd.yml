@@ -1,0 +1,37 @@
+name: CD - Micro Core Http
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+
+jobs:
+  release:
+    name: 'Generate Release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Validating Code Coverage"
+        run: |
+          git config user.name "JotaPe Tecnologia Workflow"
+          git config user.email contato@jotapetecnologia.com.br
+          git tag "v"$(grep 'version:' pubspec.yaml | sed 's/version: //g')""
+          git push origin "v"$(grep 'version:' pubspec.yaml | sed 's/version: //g')""
+          git fetch --tags origin
+          gh release create "v"$(grep 'version:' pubspec.yaml | sed 's/version: //g')"" --verify-tag
+  
+  publishing:
+    name: 'Publishing on pub.dev'
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Publishing on pub.dev"
+        uses: k-paxian/dart-package-publisher@v1.6
+        with:
+          accessToken: ${{ secrets.OAUTH_ACCESS_TOKEN }}
+          refreshToken: ${{ secrets.OAUTH_REFRESH_TOKEN }}
+          format: true
+          flutter: true
+          skipTests: true

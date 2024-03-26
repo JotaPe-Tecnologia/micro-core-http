@@ -1,0 +1,78 @@
+name: CI - Micro Core Http
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+  JAVA_VERSION: "16.x"
+  FLUTTER_VERSION: "3.19.3"
+
+jobs:
+  analyzing:
+    name: 'Flutter Analyzing'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checking out the repository"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}            
+
+      - name: "Installing Java"
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: "Installing Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: "Cleaning Previous Build (flutter clean)"
+        run: flutter clean
+
+      - name: "Downloading Libs (flutter pub get)"
+        run: flutter pub get
+
+      - name: "Running the analysis (flutter analyze)"
+        run: flutter analyze
+    
+  testing:
+    name: 'Flutter Testing'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checking out the repository"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}            
+
+      - name: "Installing Java"
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: "Installing Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: "Cleaning Previous Build (flutter clean)"
+        run: flutter clean
+
+      - name: "Downloading Libs (flutter pub get)"
+        run: flutter pub get
+
+      - name: "Running the tests (flutter test --coverage)"
+        run: flutter test --coverage
+
+      - name: "Upload coverage reports to Codecov"
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    
