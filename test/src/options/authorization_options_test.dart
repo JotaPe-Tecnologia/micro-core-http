@@ -9,19 +9,27 @@ void main() {
     return authorizationToken;
   }
 
-  late dio.RequestOptions requestWithAuthorization;
-  late dio.RequestOptions requestWithoutAuthorization;
+  // late dio.RequestOptions requestWithAuthorization;
+  // late dio.RequestOptions requestWithoutAuthorization;
 
-  setUp(
-    () {
-      requestWithAuthorization = dio.RequestOptions(
-        path: 'https://www.google.com',
-        extra: {'authorization': true},
-      );
-      requestWithoutAuthorization = dio.RequestOptions(
-        path: 'https://www.google.com',
-      );
-    },
+  // setUp(
+  //   () {
+  //     requestWithAuthorization = dio.RequestOptions(
+  //       path: 'https://www.google.com',
+  //       extra: {'authorization': true},
+  //     );
+  //     requestWithoutAuthorization = dio.RequestOptions(
+  //       path: 'https://www.google.com',
+  //     );
+  //   },
+  // );
+
+  final requestWithAuthorization = dio.RequestOptions(
+    path: 'https://www.google.com',
+    extra: {'authorization': true},
+  );
+  final requestWithoutAuthorization = dio.RequestOptions(
+    path: 'https://www.google.com',
   );
 
   group(
