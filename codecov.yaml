@@ -1,0 +1,16 @@
+coverage:
+  comment:
+    layout: "header, files, footer"
+    hide_project_coverage: false
+  precision: 2
+  range: 60...80
+  round: down
+  status:
+    project:
+      default:
+        target: 60%
+        threshold: 1%
+    patch:
+      default:
+        target: 60%
+        threshold: 1%
