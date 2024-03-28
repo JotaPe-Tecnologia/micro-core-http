@@ -121,11 +121,7 @@ final class HttpClientImpl implements HttpClient {
       ),
     );
 
-    return HttpResponse<T>.fromDioResponse(
-      response,
-      segment: segment,
-      step: step,
-    );
+    return HttpResponse<T>.fromDioResponse(response);
   }
 
   @override
@@ -157,11 +153,7 @@ final class HttpClientImpl implements HttpClient {
       ),
     );
 
-    return HttpResponse.fromDioResponse(
-      response,
-      segment: segment,
-      step: step,
-    );
+    return HttpResponse.fromDioResponse(response);
   }
 
   @override
@@ -189,11 +181,7 @@ final class HttpClientImpl implements HttpClient {
       ),
     );
 
-    return HttpResponse<T>.fromDioResponse(
-      response,
-      segment: segment,
-      step: step,
-    );
+    return HttpResponse<T>.fromDioResponse(response);
   }
 
   @override
@@ -223,11 +211,7 @@ final class HttpClientImpl implements HttpClient {
       ),
     );
 
-    return HttpResponse<T>.fromDioResponse(
-      response,
-      segment: segment,
-      step: step,
-    );
+    return HttpResponse<T>.fromDioResponse(response);
   }
 
   @override
@@ -257,11 +241,7 @@ final class HttpClientImpl implements HttpClient {
       ),
     );
 
-    return HttpResponse<T>.fromDioResponse(
-      response,
-      segment: segment,
-      step: step,
-    );
+    return HttpResponse<T>.fromDioResponse(response);
   }
 
   @override
@@ -291,10 +271,6 @@ final class HttpClientImpl implements HttpClient {
       ),
     );
 
-    return HttpResponse<T>.fromDioResponse(
-      response,
-      segment: segment,
-      step: step,
-    );
+    return HttpResponse<T>.fromDioResponse(response);
   }
 }

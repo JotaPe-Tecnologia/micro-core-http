@@ -43,8 +43,16 @@ void main() {
         () {
           // Arrange
           const requestPath = '/v1/path';
+          const segment = 'segment';
+          const step = 'step';
           final dioException = dio.DioException(
-            requestOptions: dio.RequestOptions(path: requestPath),
+            requestOptions: dio.RequestOptions(
+              path: requestPath,
+              extra: {
+                'segment': segment,
+                'step': step,
+              }
+            ),
           );
 
           // Act
@@ -53,6 +61,8 @@ void main() {
           // Assert
           expect(httpException, isA<HttpException>());
           expect(httpException.requestOptions.path, equals(requestPath));
+          expect(httpException.segment, equals(segment));
+          expect(httpException.step, equals(step));
         },
       );
     },
