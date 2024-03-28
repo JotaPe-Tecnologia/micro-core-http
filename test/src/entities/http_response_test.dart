@@ -63,15 +63,16 @@ void main() {
           const segment = 'segment';
           const step = 'step';
           final dioResponse = dio.Response(
-            requestOptions: dio.RequestOptions(),
+            requestOptions: dio.RequestOptions(
+              extra: {
+                'segment': segment,
+                'step': step,
+              },
+            ),
           );
 
           // Act
-          final httpResponse = HttpResponse.fromDioResponse(
-            dioResponse,
-            segment: segment,
-            step: step,
-          );
+          final httpResponse = HttpResponse.fromDioResponse(dioResponse);
 
           // Assert
           expect(httpResponse, isA<HttpResponse>());

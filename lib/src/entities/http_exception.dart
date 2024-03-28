@@ -16,13 +16,21 @@ import 'package:dio/dio.dart' as dio;
 
 /// Class that represents an HTTP exception.
 final class HttpException extends dio.DioException {
+  /// Optional description of the module/service that the request is supposed to hit.
+  final String? segment;
+
+  /// Optional description of what the request is supposed to do.
+  final String? step;
+
   HttpException({
     required super.requestOptions,
-    super.response,
-    super.type = dio.DioExceptionType.unknown,
     super.error,
-    StackTrace? stackTrace,
     super.message,
+    super.response,
+    this.segment,
+    StackTrace? stackTrace,
+    this.step,
+    super.type = dio.DioExceptionType.unknown,
   });
 
   /// Factory that creates a [HttpException] from a [dio.DioException].
@@ -34,6 +42,8 @@ final class HttpException extends dio.DioException {
       error: exception.error,
       stackTrace: exception.stackTrace,
       message: exception.message,
+      segment: exception.requestOptions.extra['segment'],
+      step: exception.requestOptions.extra['step'],
     );
   }
 }
