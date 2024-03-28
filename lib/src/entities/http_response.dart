@@ -36,11 +36,7 @@ final class HttpResponse<T> extends dio.Response<T> {
   });
 
   /// Factory that creates a [HttpResponse] from a [dio.Response].
-  factory HttpResponse.fromDioResponse(
-    dio.Response<T> response, {
-    String? segment,
-    String? step,
-  }) {
+  factory HttpResponse.fromDioResponse(dio.Response<T> response) {
     return HttpResponse<T>(
       requestOptions: response.requestOptions,
       data: response.data,
@@ -50,8 +46,8 @@ final class HttpResponse<T> extends dio.Response<T> {
       redirects: response.redirects,
       extra: response.extra,
       headers: response.headers,
-      segment: segment,
-      step: step,
+      segment: response.requestOptions.extra['segment'],
+      step: response.requestOptions.extra['step'],
     );
   }
 }

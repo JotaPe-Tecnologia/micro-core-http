@@ -10,16 +10,24 @@ env:
 
 jobs:
   release:
-    name: 'Generate Release'
+    name: 'Generate Tag/Release'
     runs-on: ubuntu-latest
     steps:
-      - name: "Validating Code Coverage"
+      - name: "Checking out the repository"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}            
+
+      - name: "Generating new Tag"
         run: |
           git config user.name "JotaPe Tecnologia Workflow"
           git config user.email contato@jotapetecnologia.com.br
           git tag "v"$(grep 'version:' pubspec.yaml | sed 's/version: //g')""
           git push origin "v"$(grep 'version:' pubspec.yaml | sed 's/version: //g')""
           git fetch --tags origin
+      
+      - name: "Generating new Release"
+        run: |
           gh release create "v"$(grep 'version:' pubspec.yaml | sed 's/version: //g')"" --verify-tag
   
   publishing:
@@ -27,6 +35,11 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
+      - name: "Checking out the repository"
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }} 
+          
       - name: "Publishing on pub.dev"
         uses: k-paxian/dart-package-publisher@v1.6
         with:
